@@ -34,3 +34,10 @@ A simulated v0.3 save was deliberately damaged by retaining annual totals while 
 - Continental cycling remains a lightweight feeder/free-agent layer
 - Women’s cycling and Olympic road events remain future modules
 - A detail can only be reconstructed when the corresponding historical race edition still exists in the save
+
+## v0.5 regression
+
+- 12/12 automated tests pass.
+- Grand Tour runner-up gap capped at six minutes; top-ten gap bounded to a modern plausible range.
+- Tour winner receives at least 1,300 UCI points before stage and jersey additions.
+- Rolling and calendar-year ranking ledgers survive save upgrades.

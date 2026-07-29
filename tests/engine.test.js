@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createUniverse, hallScore, openNextSeason, simulateNextEvent, simulateSeason, simulateWeeks, upgradeUniverse } from '../src/engine.js';
+import { createUniverse, hallScore, openNextSeason, simulateNextEvent, simulateSeason, simulateWeeks, uciRankings, upgradeUniverse } from '../src/engine.js';
 import { renderDirectorPageForTest, renderFilteredResultsForTest, renderPageForTest, renderRiderPageForTest, renderTeamPageForTest } from '../src/app.js';
 
 test('creates the intended modern cycling world', () => {
@@ -180,4 +180,20 @@ test('renders full team and director pages with exact annual win lists', () => {
   assert.match(directorPage, /Complete director year breakdown/);
   if (teamWin) assert.ok(teamPage.includes(teamWin));
   if (directorWin) assert.ok(directorPage.includes(directorWin));
+});
+
+test('uses realistic Grand Tour gaps and official-style UCI ranking values',()=>{
+  const state=createUniverse({seed:505});
+  simulateSeason(state);
+  for(const id of ['giro','tour','vuelta']){
+    const result=state.eventResults.find(row=>row.eventId===id);
+    assert.ok(result.classification[1].gap<=360,'runner-up should not casually finish tens of minutes behind');
+    assert.ok(result.classification[9].gap<=2200,'top ten gaps should remain within a modern plausible range');
+  }
+  const ranking=uciRankings(state,'year');
+  assert.ok(ranking.riders[0].points>1300);
+  assert.ok(ranking.teams.length>=18);
+  const tour=state.eventResults.find(row=>row.eventId==='tour');
+  const tourWinner=ranking.riders.find(row=>row.id===tour.winnerId);
+  assert.ok(tourWinner.points>=1300);
 });

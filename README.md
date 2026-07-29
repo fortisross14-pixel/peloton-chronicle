@@ -76,3 +76,11 @@ Existing v0.1/v0.2 universes are upgraded when opened. A new universe is still r
 - Race directors for every team plus agency markets and career progression
 - Dynamic sponsors, promotion/relegation, team closures, new projects and changing race prestige
 - Locally bundled country flags for consistent browser and Windows rendering
+
+## v0.5 ranking and timing update
+
+- Adds a dedicated UCI Rankings page with rolling 52-week and current-calendar-year tables.
+- Uses result-class point scales: Tour GC 1,300; Giro/Vuelta GC 1,100; Monuments 800; Tour stages 210, with points also awarded down the classification.
+- Team rankings total the best 20 rider scores.
+- Compresses simulated stage-race gaps into modern plausible ranges so a routine runner-up is not tens of minutes behind.
+- Existing v0.4 saves rebuild their point ledger from archived editions on first load.
