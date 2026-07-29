@@ -1,4 +1,4 @@
-# Peloton Chronicle v0.3 deployment checklist
+# Peloton Chronicle v0.4 deployment checklist
 
 ## Local verification
 
@@ -15,8 +15,8 @@ Open the preview URL and verify:
 2. Select **WorldTour** and **Grand Tours** on Results; only Giro, Tour and Vuelta should remain.
 3. Simulate several weeks and use **Go to race details & history**.
 4. Open a rider from Le Grand Braquet, then use **Open full rider page**.
-5. Simulate to the end of the year. Confirm the year does not advance and the complete season remains explorable.
-6. Select **Open next season** and confirm the new year begins with fresh results and the previous year in the archive.
+5. Simulate to the end of the year. Confirm the date is December 31, the season-review panel appears, and the year does not advance.
+6. Review the Giro, Tour, Vuelta, rider and team results, then select **Move to next year** and confirm the new year begins with fresh results.
 7. Close the browser and reopen the same save drawer.
 
 ## GitHub Pages
@@ -24,7 +24,7 @@ Open the preview URL and verify:
 ```bash
 git init
 git add .
-git commit -m "Peloton Chronicle v0.3"
+git commit -m "Peloton Chronicle v0.4"
 git branch -M main
 git remote add origin YOUR_REPOSITORY_URL
 git push -u origin main
@@ -56,4 +56,4 @@ Upload everything inside `dist/` to the website root. Do not upload only `index.
 
 ## Data note
 
-No SQL or Neon setup is needed for v0.3. IndexedDB is created automatically on first use. Use **Save & Settings → Export JSON** before clearing browser data, changing domains or moving to another computer.
+No SQL or Neon setup is needed for v0.4. IndexedDB is created automatically on first use. Use **Save & Settings → Export JSON** before clearing browser data, changing domains or moving to another computer.

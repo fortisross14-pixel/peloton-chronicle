@@ -1,4 +1,4 @@
-# Peloton Chronicle v0.3
+# Peloton Chronicle v0.4
 
 A Vite + React modern-era professional road-cycling world simulation. The universe advances by calendar weeks rather than one race at a time, while riders, directors, team organizations, sponsor identities, race editions and completed seasons remain searchable in a permanent historical archive.
 
@@ -48,23 +48,21 @@ Run `npm run build`, then upload the contents of `dist/` to the web root.
 
 ## Save architecture
 
-Peloton Chronicle v0.3 does **not** require Neon or another backend. Universes are stored in IndexedDB, with three save drawers and JSON export. Saves remain local to the browser and device. Clearing browser site data deletes local universes, so use **Save & Settings → Export JSON** for external backups.
+Peloton Chronicle v0.4 does **not** require Neon or another backend. Universes are stored in IndexedDB, with three save drawers and JSON export. Saves remain local to the browser and device. Clearing browser site data deletes local universes, so use **Save & Settings → Export JSON** for external backups.
 
 Existing v0.1/v0.2 universes are upgraded when opened. A new universe is still recommended when testing generation or balance changes because an old save preserves its existing population and prior results.
 
-## v0.3 highlights
+## v0.4 highlights
 
-- Results filters now rebuild the race browser and automatically select the first matching event. **WorldTour + Grand Tours** shows only Giro, Tour and Vuelta.
-- Results-page links now open permanent race pages correctly.
-- Race edition history records the GC winner, team, points jersey, mountains jersey, young-rider jersey and number of stages for every year.
-- Riders opened from the Riders screen use a complete dedicated page; modal dossiers elsewhere include a link to that full page.
-- Rider season records list the exact races won, stage wins grouped by terrain and race, classification jerseys, team/tier, points, race days and Grand Tour results.
-- Le Grand Braquet race reports and preseason sections contain clickable rider links.
-- Preseason coverage separates championship odds, elite transfers and elite U23 arrivals. Transfer rows include rating, age, rarity, previous ranking and origin/destination team and tier.
-- Ending a season now closes the current year without moving time forward. All current results and rankings remain open until **Open next season** is selected.
-- Opening the next season performs archiving, aging, retirements, promotions, transfers, sponsor changes, director movement, prospect generation and calendar resets.
-- Hall of Fame weights distinguish the Tour, Giro, Vuelta, Monuments and championships. Approximately five Monument wins are comparable to a Tour–Giro double, while stages and secondary races add depth rather than replacing major victories.
-- Elite outcome persistence creates occasional multi-Grand-Tour dynasties through permanent event affinity, experience and career quality, while form, fatigue, annual shape, route fit and randomness still allow upsets.
+- **End of year is now a hard season stop.** Simulation finishes on December 31 of the current year, preserves the complete race desk and displays a dedicated season-review front page. Only the explicit **Move to next year** action archives and resets the calendar.
+- The year-end review shows the world number one, leading team, race/stage leaders and the Giro, Tour and Vuelta podiums at a glance.
+- Older v0.1–v0.3 saves automatically reconstruct missing opening-year race, stage and jersey details from permanent race editions. Totals such as “11 stages” now recover the exact races and profiles whenever those editions exist in the save.
+- Rider yearly records group stage victories by profile and jersey victories by classification, for example **Mountains ×7 — Vuelta a España; Volta a Catalunya**.
+- Teams now have dedicated full pages with sponsor lineage, current roster and an exact annual list of races, stages and jerseys won.
+- Race directors now have dedicated full pages with appointment-by-appointment annual results and exact victories under each team.
+- Team and director cards open their full pages directly; modal dossiers reached from other screens retain an **Open full details** action.
+- Existing permanent race pages continue to show GC, points, mountains and young-rider winners for every edition.
+- Results filters, race links, weekly simulation and the balanced elite-career model from v0.3 remain intact.
 
 ## Core world structure
 

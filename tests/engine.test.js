@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createUniverse, hallScore, openNextSeason, simulateNextEvent, simulateSeason, simulateWeeks } from '../src/engine.js';
-import { renderFilteredResultsForTest, renderPageForTest, renderRiderPageForTest } from '../src/app.js';
+import { createUniverse, hallScore, openNextSeason, simulateNextEvent, simulateSeason, simulateWeeks, upgradeUniverse } from '../src/engine.js';
+import { renderDirectorPageForTest, renderFilteredResultsForTest, renderPageForTest, renderRiderPageForTest, renderTeamPageForTest } from '../src/app.js';
 
 test('creates the intended modern cycling world', () => {
   const state = createUniverse({ seed: 42 });
@@ -94,8 +94,10 @@ test('end of year closes the current season without opening the next one', () =>
   assert.ok(output.archive.summary.topRider);
   assert.equal(state.eventIndex, state.events.length);
   const review = renderPageForTest(state, 'results');
-  assert.match(review, /Open 2027 season/);
+  assert.match(review, /Open 2027 season|Move to 2027/);
   assert.match(review, /2026 is complete/);
+  assert.match(review, /2026 Season Review/);
+  assert.match(review, /December 31/);
 });
 
 test('opening the next season archives the completed year and resets the calendar', () => {
@@ -142,4 +144,40 @@ test('Hall of Fame weighting makes Tour plus Giro comparable to an elite Monumen
   classicsRider.career.monuments = 5;
   const difference = Math.abs(hallScore(grandTourRider) - hallScore(classicsRider));
   assert.ok(difference < 500);
+});
+
+
+test('repairs detailed opening-year wins in upgraded saves from permanent race editions', () => {
+  const state = createUniverse({ seed: 424242 });
+  simulateSeason(state);
+  const rider = state.riders.find(item => item.career.seasons.some(season => season.year === 2026 && (season.stageWins > 0 || season.raceWins > 0 || season.jerseys > 0)));
+  assert.ok(rider);
+  const season = rider.career.seasons.find(item => item.year === 2026);
+  const expected = { races: season.raceWins, stages: season.stageWins, jerseys: season.jerseys };
+  season.raceWinDetails = [];
+  season.stageWinDetails = [];
+  season.jerseyWinDetails = [];
+  state.version = 3;
+  delete state.detailRepairV4;
+  upgradeUniverse(state);
+  assert.equal(season.raceWinDetails.length, expected.races);
+  assert.equal(season.stageWinDetails.length, expected.stages);
+  assert.equal(season.jerseyWinDetails.length, expected.jerseys);
+});
+
+test('renders full team and director pages with exact annual win lists', () => {
+  const state = createUniverse({ seed: 98765 });
+  simulateSeason(state);
+  const team = state.teams.find(item => item.career.seasons.some(season => season.raceWins > 0));
+  const director = state.directors.find(item => item.career.seasons.some(season => season.raceWins > 0));
+  assert.ok(team);
+  assert.ok(director);
+  const teamPage = renderTeamPageForTest(state, team.id);
+  const directorPage = renderDirectorPageForTest(state, director.id);
+  const teamWin = team.career.seasons.find(season => season.raceWinDetails?.length)?.raceWinDetails[0]?.event;
+  const directorWin = director.career.seasons.find(season => season.raceWinDetails?.length)?.raceWinDetails[0]?.event;
+  assert.match(teamPage, /Complete team year breakdown/);
+  assert.match(directorPage, /Complete director year breakdown/);
+  if (teamWin) assert.ok(teamPage.includes(teamWin));
+  if (directorWin) assert.ok(directorPage.includes(directorWin));
 });
