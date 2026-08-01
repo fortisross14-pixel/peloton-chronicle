@@ -36,9 +36,9 @@ function pageFor(id){const pages={results:resultsPage,calendar:calendarPage,race
 function render(){if(!state)return;app.innerHTML=shell(pageFor(route)());}
 export function renderPageForTest(universe,page='results'){state=upgradeUniverse(universe);route=page;selectedEventId=selectedEventId||state.events[0]?.id;selectedRaceId=selectedRaceId||state.events[0]?.id;modal=null;return shell(pageFor(page)());}
 export function renderFilteredResultsForTest(universe,{tier='all',type='all',search=''}={}){state=upgradeUniverse(universe);route='results';resultsTier=tier;resultsType=type;resultsSearch=search;selectedEventId=null;modal=null;return shell(resultsPage());}
-export function renderRiderPageForTest(universe,riderId){state=upgradeUniverse(universe);route='rider-detail';selectedRiderId=riderId;modal=null;return shell(riderDetailPage());}
-export function renderTeamPageForTest(universe,teamId){state=upgradeUniverse(universe);route='team-detail';selectedTeamId=teamId;modal=null;return shell(teamDetailPage());}
-export function renderDirectorPageForTest(universe,directorId){state=upgradeUniverse(universe);route='director-detail';selectedDirectorId=directorId;modal=null;return shell(directorDetailPage());}
+export function renderRiderPageForTest(universe,riderId,tab='overview'){state=upgradeUniverse(universe);route='rider-detail';selectedRiderId=riderId;riderTab=tab;modal=null;return shell(riderDetailPage());}
+export function renderTeamPageForTest(universe,teamId,tab='overview'){state=upgradeUniverse(universe);route='team-detail';selectedTeamId=teamId;teamTab=tab;modal=null;return shell(teamDetailPage());}
+export function renderDirectorPageForTest(universe,directorId,tab='overview'){state=upgradeUniverse(universe);route='director-detail';selectedDirectorId=directorId;directorTab=tab;modal=null;return shell(directorDetailPage());}
 
 function latestResult(){return state?.eventResults?.at(-1)||null;}
 function currentResult(eventId){return state.eventResults.find(result=>result.eventId===eventId&&result.year===state.year);}

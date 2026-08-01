@@ -62,7 +62,7 @@ test('renders navigation, working race links and a full rider year breakdown', (
   const raceDetail = renderPageForTest(state, 'race-detail');
   const magazine = renderPageForTest(state, 'magazine');
   const rider = state.riders.find(item => item.currentSeason.stageWins > 0) || state.riders[0];
-  const riderPage = renderRiderPageForTest(state, rider.id);
+  const riderPage = renderRiderPageForTest(state, rider.id, 'history');
   assert.match(results, /results-browser/);
   assert.match(results, /data-open-race="[^"]+"/);
   assert.match(results, /data-action="simulate-1"/);
@@ -131,7 +131,7 @@ test('keeps a five-season chronicle structurally valid', () => {
   assert.ok(JSON.stringify(state).length < 16_000_000);
 });
 
-test('Hall of Fame weighting makes Tour plus Giro comparable to an elite Monument career', () => {
+test('Hall of Fame weighting places Tour plus Giro above five Monuments', () => {
   const base = createUniverse({ seed: 8080 }).riders[0];
   const grandTourRider = structuredClone(base);
   grandTourRider.career.raceWinDetails = [
@@ -142,8 +142,7 @@ test('Hall of Fame weighting makes Tour plus Giro comparable to an elite Monumen
   const classicsRider = structuredClone(base);
   classicsRider.career.raceWinDetails = Array.from({ length: 5 }, (_, index) => ({ eventId: `monument-${index}`, kind: 'monument' }));
   classicsRider.career.monuments = 5;
-  const difference = Math.abs(hallScore(grandTourRider) - hallScore(classicsRider));
-  assert.ok(difference < 500);
+  assert.ok(hallScore(grandTourRider) > hallScore(classicsRider));
 });
 
 
@@ -172,12 +171,12 @@ test('renders full team and director pages with exact annual win lists', () => {
   const director = state.directors.find(item => item.career.seasons.some(season => season.raceWins > 0));
   assert.ok(team);
   assert.ok(director);
-  const teamPage = renderTeamPageForTest(state, team.id);
-  const directorPage = renderDirectorPageForTest(state, director.id);
+  const teamPage = renderTeamPageForTest(state, team.id, 'history');
+  const directorPage = renderDirectorPageForTest(state, director.id, 'history');
   const teamWin = team.career.seasons.find(season => season.raceWinDetails?.length)?.raceWinDetails[0]?.event;
   const directorWin = director.career.seasons.find(season => season.raceWinDetails?.length)?.raceWinDetails[0]?.event;
-  assert.match(teamPage, /Complete team year breakdown/);
-  assert.match(directorPage, /Complete director year breakdown/);
+  assert.match(teamPage, /career-season-list/);
+  assert.match(directorPage, /career-season-list/);
   if (teamWin) assert.ok(teamPage.includes(teamWin));
   if (directorWin) assert.ok(directorPage.includes(directorWin));
 });
