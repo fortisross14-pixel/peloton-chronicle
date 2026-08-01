@@ -1,3 +1,7 @@
+# Peloton Chronicle v0.6
+
+Results home now begins with rolling UCI rider/team rankings, the last three winners, Grand Tour watch cards, and top-three race/stage leaders. Calendar tier and type filters are stateful and rebuild the calendar correctly.
+
 # Peloton Chronicle v0.4
 
 A Vite + React modern-era professional road-cycling world simulation. The universe advances by calendar weeks rather than one race at a time, while riders, directors, team organizations, sponsor identities, race editions and completed seasons remain searchable in a permanent historical archive.
@@ -77,7 +81,7 @@ Existing v0.1/v0.2 universes are upgraded when opened. A new universe is still r
 - Dynamic sponsors, promotion/relegation, team closures, new projects and changing race prestige
 - Locally bundled country flags for consistent browser and Windows rendering
 
-## v0.5 ranking and timing update
+## v0.6 ranking and timing update
 
 - Adds a dedicated UCI Rankings page with rolling 52-week and current-calendar-year tables.
 - Uses result-class point scales: Tour GC 1,300; Giro/Vuelta GC 1,100; Monuments 800; Tour stages 210, with points also awarded down the classification.

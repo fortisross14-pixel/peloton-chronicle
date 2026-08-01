@@ -35,7 +35,7 @@ A simulated v0.3 save was deliberately damaged by retaining annual totals while 
 - Women’s cycling and Olympic road events remain future modules
 - A detail can only be reconstructed when the corresponding historical race edition still exists in the save
 
-## v0.5 regression
+## v0.6 regression
 
 - 12/12 automated tests pass.
 - Grand Tour runner-up gap capped at six minutes; top-ten gap bounded to a modern plausible range.
