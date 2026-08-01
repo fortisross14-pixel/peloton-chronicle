@@ -1,4 +1,4 @@
-# Peloton Chronicle v0.6
+# Peloton Chronicle v0.7
 
 Results home now begins with rolling UCI rider/team rankings, the last three winners, Grand Tour watch cards, and top-three race/stage leaders. Calendar tier and type filters are stateful and rebuild the calendar correctly.
 
@@ -81,10 +81,34 @@ Existing v0.1/v0.2 universes are upgraded when opened. A new universe is still r
 - Dynamic sponsors, promotion/relegation, team closures, new projects and changing race prestige
 - Locally bundled country flags for consistent browser and Windows rendering
 
-## v0.6 ranking and timing update
+## v0.7 ranking and timing update
 
 - Adds a dedicated UCI Rankings page with rolling 52-week and current-calendar-year tables.
 - Uses result-class point scales: Tour GC 1,300; Giro/Vuelta GC 1,100; Monuments 800; Tour stages 210, with points also awarded down the classification.
 - Team rankings total the best 20 rider scores.
 - Compresses simulated stage-race gaps into modern plausible ranges so a routine runner-up is not tens of minutes behind.
 - Existing v0.4 saves rebuild their point ledger from archived editions on first load.
+
+
+## v0.7 market and team-building model
+
+- Rider movement is driven by contracts, salary versus market value, happiness, team results, facilities, team tier, director quality and sponsor-backed budget.
+- Elite unhappy or underpaid riders can be poached before their contracts expire.
+- High-budget teams that miss expectations become more aggressive in the following preseason.
+- Directors are reviewed at the start of each season and can be fired, hired from agencies or poached from another team. Elite directors are actively pulled toward WorldTour projects rather than remaining indefinitely in Continental teams.
+- Training facilities decay gradually and ambitious teams invest to restore them. Facilities affect rider performance and payroll capacity.
+- The Market screen is redesigned for mobile and clearly separates headline elite transfers, director changes, professional moves and sponsor changes.
+
+## v0.8 profile and balance polish
+
+- Rider pages now use Overview, Current season and History tabs.
+- Rider overview identifies the generated career year and displays the annual development curve.
+- Current season lists every target and its result/status.
+- History summarizes wins by competition level before the exact annual archive.
+- Team and director pages now use the same three-tab navigation.
+- UCI rankings can be filtered by current tier.
+- Almanac seasons include Tour, Giro and Vuelta champions with clickable entities.
+- Simulation preserves the screen currently being viewed.
+- Grand Tour achievements carry substantially more Hall of Fame weight.
+- Exceptional riders receive more cross-specialty flexibility, while specialists retain an advantage.
+- WorldTour recruitment places a stronger premium on 90+ potential riders.

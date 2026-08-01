@@ -41,3 +41,14 @@ A simulated v0.3 save was deliberately damaged by retaining annual totals while 
 - Grand Tour runner-up gap capped at six minutes; top-ten gap bounded to a modern plausible range.
 - Tour winner receives at least 1,300 UCI points before stage and jersey additions.
 - Rolling and calendar-year ranking ledgers survive save upgrades.
+
+
+## v0.7 regression
+
+- Existing 12-test engine suite: PASS.
+- Four-season market simulation: top 97-rated director moved from the Continental tier to WorldTour.
+- Elite rider transfers preserve origin/destination tier, rating, rarity and move type.
+- Facilities, salary budgets and happiness defaults migrate into older saves.
+- Source files pass Node syntax checks.
+
+Note: the hosted build environment did not expose @vitejs/plugin-react in its internal npm registry, so the static deploy package was generated with the included dependency-free fallback builder. The source project remains a standard Vite + React project and builds normally after `npm install` in the user's environment.
