@@ -1,14 +1,15 @@
 {
   "name": "peloton-chronicle",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "test": "node --test tests/engine.test.js",
-    "build:fallback": "node scripts/build.mjs"
+    "build:fallback": "node scripts/build.mjs",
+    "test:skills": "node scripts/qa-skills-v13.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",

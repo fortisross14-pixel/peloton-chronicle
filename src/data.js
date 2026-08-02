@@ -294,12 +294,12 @@ export const INITIAL_SPONSOR_IDS = {
 };
 
 export const RARITIES = {
-  generational: { label:'Generational', min:94, max:98, weight:0.004 },
-  legend: { label:'Legend', min:89, max:94, weight:0.018 },
-  epic: { label:'Epic', min:84, max:90, weight:0.055 },
-  rare: { label:'Rare', min:78, max:85, weight:0.16 },
-  uncommon: { label:'Uncommon', min:72, max:80, weight:0.31 },
-  common: { label:'Common', min:65, max:76, weight:0.453 }
+  generational: { label:'Generational', min:95, max:100, weight:0.004 },
+  legend: { label:'Legend', min:90, max:95, weight:0.018 },
+  epic: { label:'Epic', min:85, max:90, weight:0.055 },
+  rare: { label:'Rare', min:80, max:85, weight:0.16 },
+  uncommon: { label:'Uncommon', min:70, max:80, weight:0.31 },
+  common: { label:'Common', min:50, max:69, weight:0.453 }
 };
 
 export const STAGE_LABELS = {

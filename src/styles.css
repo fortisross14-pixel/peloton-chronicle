@@ -579,3 +579,13 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
   .profile-hero{grid-template-columns:1fr}.profile-rating{text-align:left}
   .mini-stats{grid-template-columns:repeat(3,1fr)}
 }
+
+/* v1.3 rider skill model ------------------------------------------------ */
+.rider-skill-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rider-skill{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:5px 10px;padding:10px 11px;border:1px solid var(--line);border-top:3px solid var(--team-primary,var(--wine));background:linear-gradient(145deg,rgba(255,250,239,.88),rgba(232,216,183,.62))}
+.rider-skill span{font:800 .63rem var(--ui);letter-spacing:.045em;text-transform:uppercase;color:var(--ink-soft)}
+.rider-skill strong{color:var(--wine-dark);font:900 1.35rem var(--display);font-variant-numeric:tabular-nums}
+.rider-skill i{grid-column:1/-1;display:block;height:6px;background:#d8c6a3;overflow:hidden}
+.rider-skill i b{display:block;height:100%;background:linear-gradient(90deg,var(--team-primary,var(--wine)),var(--team-secondary,var(--gold)))}
+@media(max-width:760px){.rider-skill-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:430px){.rider-skill-grid{grid-template-columns:1fr}}

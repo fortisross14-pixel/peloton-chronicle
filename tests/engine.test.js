@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createUniverse, ELITE_TARGETS, facilityUpgradeCost, hallScore, openNextSeason, simulateNextEvent, simulateSeason, simulateWeeks, uciRankings, upgradeUniverse } from '../src/engine.js';
+import { buildRiderSkills, createUniverse, currentAbility, ELITE_TARGETS, facilityUpgradeCost, hallScore, openNextSeason, simulateNextEvent, simulateSeason, simulateWeeks, stageSkillRating, uciRankings, upgradeUniverse } from '../src/engine.js';
+import { RARITIES } from '../src/data.js';
 import { renderDirectorPageForTest, renderFilteredResultsForTest, renderPageForTest, renderRiderPageForTest, renderRidersForTest, renderTeamPageForTest, renderTeamsForTest } from '../src/app.js';
 
 test('creates the intended modern cycling world', () => {
@@ -115,6 +116,7 @@ test('opening the next season archives the completed year and resets the calenda
 
 test('keeps a five-season chronicle structurally valid', () => {
   const state = createUniverse({ seed: 314159 });
+  const openingBaseSkills = new Map(state.riders.map(rider => [rider.id, rider.baseSkill]));
   for (let year = 0; year < 5; year += 1) {
     simulateSeason(state);
     openNextSeason(state);
@@ -128,6 +130,7 @@ test('keeps a five-season chronicle structurally valid', () => {
   assert.equal(new Set(rosterIds).size, rosterIds.length);
   assert.equal(active.length, rosterIds.length);
   assert.equal(active.filter(rider => rider.tier === 'u23' && rider.age > 22).length, 0);
+  for (const [id, baseSkill] of openingBaseSkills) assert.equal(state.riders.find(rider => rider.id === id)?.baseSkill, baseSkill);
   for (const [rarity, target] of Object.entries(ELITE_TARGETS)) assert.equal(active.filter(rider => rider.rarity === rarity).length, target);
   assert.equal(active.filter(rider => rider.potential >= 90 && rider.age >= 23 && rider.tier !== 'worldtour').length, 0);
   for (const team of state.teams.filter(team => team.status === 'active')) {
@@ -251,4 +254,73 @@ test('rider and team filters and expanded economy cards render correctly', () =>
   assert.match(teamPage, /Primary · team name/);
   assert.match(teamPage, /Secondary · maillot/);
   assert.match(teamPage, /Projected balance/);
+});
+
+
+test('rarity fixes permanent base skill and annual skills average to base times multiplier', () => {
+  const state = createUniverse({ seed: 131313 });
+  for (const rider of state.riders.filter(item => !item.retired)) {
+    const range = RARITIES[rider.rarity];
+    assert.ok(rider.baseSkill >= range.min && rider.baseSkill <= range.max, `${rider.rarity} base ${rider.baseSkill}`);
+    assert.equal(rider.potential, rider.baseSkill);
+    const values = Object.values(rider.skills);
+    assert.equal(values.length, 9);
+    const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+    assert.equal(average, currentAbility(rider));
+    assert.equal(average, Math.round(rider.baseSkill * rider.annualMultiplier));
+  }
+});
+
+test('stage specialties redistribute the same average into relevant skills', () => {
+  const common = { id:'skill-model-test', baseSkill:90, potential:90, careerLength:12, debutYear:2019, debutAge:18, age:25, developmentProfile:'stable' };
+  const climber = buildRiderSkills({ ...common, terrain:'climber' }, 2026);
+  const sprinter = buildRiderSkills({ ...common, terrain:'sprinter' }, 2026);
+  const timeTrialist = buildRiderSkills({ ...common, terrain:'time-trialist' }, 2026);
+  assert.equal(climber.annualRating, sprinter.annualRating);
+  assert.equal(sprinter.annualRating, timeTrialist.annualRating);
+  assert.ok(climber.skills.climbing > sprinter.skills.climbing);
+  assert.ok(sprinter.skills.speed > climber.skills.speed);
+  assert.ok(timeTrialist.skills.power > sprinter.skills.power);
+  assert.ok(stageSkillRating({ ...common, terrain:'climber', skills:climber.skills, annualRating:climber.annualRating }, 'mountain') > stageSkillRating({ ...common, terrain:'sprinter', skills:sprinter.skills, annualRating:sprinter.annualRating }, 'mountain'));
+});
+
+test('deterministic stage winners exhibit the skills demanded by their terrain', () => {
+  const state = createUniverse({ seed: 246810 });
+  simulateSeason(state);
+  const active = state.riders.filter(rider => !rider.retired);
+  const populationClimbing = active.reduce((sum, rider) => sum + rider.skills.climbing, 0) / active.length;
+  const populationSpeed = active.reduce((sum, rider) => sum + rider.skills.speed, 0) / active.length;
+  const mountainWinners = state.eventResults.flatMap(result => result.stages.filter(stage => stage.profile === 'mountain').map(stage => state.riders.find(rider => rider.id === stage.winnerId))).filter(Boolean);
+  const flatWinners = state.eventResults.flatMap(result => result.stages.filter(stage => stage.profile === 'flat').map(stage => state.riders.find(rider => rider.id === stage.winnerId))).filter(Boolean);
+  assert.ok(mountainWinners.length > 10);
+  assert.ok(flatWinners.length > 10);
+  assert.ok(mountainWinners.reduce((sum, rider) => sum + rider.skills.climbing, 0) / mountainWinners.length > populationClimbing + 5);
+  assert.ok(flatWinners.reduce((sum, rider) => sum + rider.skills.speed, 0) / flatWinners.length > populationSpeed + 5);
+});
+
+test('v1.2 saves migrate deterministically into the new rarity bands', () => {
+  const state = createUniverse({ seed: 919191 });
+  const rider = state.riders.find(item => item.rarity === 'legend');
+  state.version = 8;
+  rider.baseSkill = 89;
+  rider.potential = 89;
+  delete rider.skills;
+  delete rider.annualRating;
+  delete rider.annualMultiplier;
+  upgradeUniverse(state);
+  assert.equal(rider.baseSkill, 90);
+  assert.equal(rider.potential, 90);
+  assert.equal(Object.keys(rider.skills).length, 9);
+  assert.equal(currentAbility(rider), Math.round(rider.baseSkill * rider.annualMultiplier));
+});
+
+test('rider overview exposes the fixed base, multiplier and individual skills', () => {
+  const state = createUniverse({ seed: 929292 });
+  const rider = state.riders.find(item => item.rarity === 'generational');
+  const page = renderRiderPageForTest(state, rider.id, 'overview');
+  assert.match(page, /Base skill/);
+  assert.match(page, /Annual factor/);
+  assert.match(page, /Current rating/);
+  assert.match(page, /Rider skills/);
+  assert.match(page, /Mental strength/);
 });
