@@ -1,0 +1,184 @@
+[
+  {
+    "seed": 1101,
+    "completedSeasons": 4,
+    "finalYear": 2030,
+    "seasons": [
+      {
+        "year": 2026,
+        "topRider": {
+          "name": "Michael Wilson",
+          "ability": 94,
+          "tier": "worldtour",
+          "careerYear": 9,
+          "careerLength": 14
+        },
+        "worldNumberOne": "Simone Gallo",
+        "eliteMovesNextWindow": 2,
+        "directorMovesNextWindow": 1,
+        "sponsorChangesNextWindow": 0,
+        "tierChangesNextWindow": 6,
+        "matureEliteOutsideWorldTourAfterOffseason": 0
+      },
+      {
+        "year": 2027,
+        "topRider": {
+          "name": "Eoin Byrne",
+          "ability": 93,
+          "tier": "worldtour",
+          "careerYear": 6,
+          "careerLength": 11
+        },
+        "worldNumberOne": "Simone Gallo",
+        "eliteMovesNextWindow": 2,
+        "directorMovesNextWindow": 9,
+        "sponsorChangesNextWindow": 15,
+        "tierChangesNextWindow": 6,
+        "matureEliteOutsideWorldTourAfterOffseason": 0
+      },
+      {
+        "year": 2028,
+        "topRider": {
+          "name": "Lenny Gautier",
+          "ability": 96,
+          "tier": "worldtour",
+          "careerYear": 6,
+          "careerLength": 16
+        },
+        "worldNumberOne": "Eirik Larsen",
+        "eliteMovesNextWindow": 3,
+        "directorMovesNextWindow": 7,
+        "sponsorChangesNextWindow": 12,
+        "tierChangesNextWindow": 8,
+        "matureEliteOutsideWorldTourAfterOffseason": 0
+      },
+      {
+        "year": 2029,
+        "topRider": {
+          "name": "Vadim Ivanov",
+          "ability": 91,
+          "tier": "worldtour",
+          "careerYear": 7,
+          "careerLength": 18
+        },
+        "worldNumberOne": "Sergio García",
+        "eliteMovesNextWindow": 3,
+        "directorMovesNextWindow": 11,
+        "sponsorChangesNextWindow": 22,
+        "tierChangesNextWindow": 6,
+        "matureEliteOutsideWorldTourAfterOffseason": 0
+      }
+    ],
+    "activeRiders": 1089,
+    "eliteCounts": {
+      "generational": 3,
+      "legend": 9,
+      "epic": 18
+    },
+    "worldTourTeams": 18,
+    "proSeriesTeams": 16,
+    "maxMatureEliteOutsideWorldTour": 0,
+    "directorLockViolations": 0,
+    "sponsorChanges": 49,
+    "tierChangeEntries": 26,
+    "transferEntries": 414,
+    "facilityRange": [
+      3.7,
+      8.8
+    ],
+    "positiveBalanceTeams": 91,
+    "activeTeams": 91,
+    "saveBytes": 12100476
+  },
+  {
+    "seed": 2202,
+    "completedSeasons": 4,
+    "finalYear": 2030,
+    "seasons": [
+      {
+        "year": 2026,
+        "topRider": {
+          "name": "Lennert Goossens",
+          "ability": 94,
+          "tier": "worldtour",
+          "careerYear": 5,
+          "careerLength": 12
+        },
+        "worldNumberOne": "Anders Andersen",
+        "eliteMovesNextWindow": 3,
+        "directorMovesNextWindow": 1,
+        "sponsorChangesNextWindow": 0,
+        "tierChangesNextWindow": 6,
+        "matureEliteOutsideWorldTourAfterOffseason": 0
+      },
+      {
+        "year": 2027,
+        "topRider": {
+          "name": "Lenny Fontaine",
+          "ability": 95,
+          "tier": "worldtour",
+          "careerYear": 7,
+          "careerLength": 14
+        },
+        "worldNumberOne": "Oscar Wilson",
+        "eliteMovesNextWindow": 3,
+        "directorMovesNextWindow": 12,
+        "sponsorChangesNextWindow": 12,
+        "tierChangesNextWindow": 6,
+        "matureEliteOutsideWorldTourAfterOffseason": 0
+      },
+      {
+        "year": 2028,
+        "topRider": {
+          "name": "Lenny Fontaine",
+          "ability": 97,
+          "tier": "worldtour",
+          "careerYear": 8,
+          "careerLength": 14
+        },
+        "worldNumberOne": "Arman Ivanov",
+        "eliteMovesNextWindow": 4,
+        "directorMovesNextWindow": 8,
+        "sponsorChangesNextWindow": 10,
+        "tierChangesNextWindow": 8,
+        "matureEliteOutsideWorldTourAfterOffseason": 0
+      },
+      {
+        "year": 2029,
+        "topRider": {
+          "name": "Lenny Fontaine",
+          "ability": 97,
+          "tier": "worldtour",
+          "careerYear": 9,
+          "careerLength": 14
+        },
+        "worldNumberOne": "Arman Ivanov",
+        "eliteMovesNextWindow": 5,
+        "directorMovesNextWindow": 2,
+        "sponsorChangesNextWindow": 11,
+        "tierChangesNextWindow": 6,
+        "matureEliteOutsideWorldTourAfterOffseason": 0
+      }
+    ],
+    "activeRiders": 1089,
+    "eliteCounts": {
+      "generational": 3,
+      "legend": 9,
+      "epic": 18
+    },
+    "worldTourTeams": 18,
+    "proSeriesTeams": 16,
+    "maxMatureEliteOutsideWorldTour": 0,
+    "directorLockViolations": 0,
+    "sponsorChanges": 33,
+    "tierChangeEntries": 26,
+    "transferEntries": 409,
+    "facilityRange": [
+      4.2,
+      8.8
+    ],
+    "positiveBalanceTeams": 91,
+    "activeTeams": 91,
+    "saveBytes": 12148508
+  }
+]

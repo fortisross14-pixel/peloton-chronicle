@@ -611,9 +611,18 @@ function archiveSeason(state){
 function completeSeason(state){
   if(state.seasonStatus==='complete'&&state.pendingArchive)return{state,result:null,seasonComplete:true,archive:state.pendingArchive};const archive=archiveSeason(state);state.pendingArchive=archive;state.seasonStatus='complete';state.reviewMode=true;state.currentDay=dayOfYear(state.year,12,31);state.news.unshift({year:state.year,phase:'postseason',category:'Season review',importance:'lead',headline:archive.headline,body:`${archive.summary.topTeam?.name||'The leading team'} topped the team table. ${archive.summary.mostWins?.name||'The leading winner'} recorded the most race victories and ${archive.summary.mostStages?.name||'the leading sprinter'} collected the most stages.`});return{state,result:null,seasonComplete:true,archive};
 }
+function compactUciPointLedger(state){
+  // Only the active and immediately preceding calendar years are required for
+  // current-year and rolling-52-week rankings. Older annual rankings are already
+  // preserved in season archives and career totals, so keeping every award row
+  // forever only duplicates historical data and causes saves to grow excessively.
+  const minimumYear=(state.year||2026)-1;
+  state.uciPointEvents=(state.uciPointEvents||[]).filter(award=>(award.year||0)>=minimumYear);
+}
+
 export function openNextSeason(state){
   upgradeUniverse(state);if(state.seasonStatus!=='complete')return{state,opened:false};const archive=state.pendingArchive||archiveSeason(state);if(!state.archives.some(a=>a.year===archive.year))state.archives.push(archive);state.pendingArchive=null;state.year+=1;for(const rider of state.riders)if(!rider.retired)rider.age+=1;for(const director of state.directors)if(!director.retired)director.age+=1;
-  applyRetirementsAndDevelopment(state);enforceEliteCaps(state);applyTeamLifecycle(state);applySponsors(state);applyFacilities(state);applyDirectorMarket(state);applyTransfers(state);enforceEliteCaps(state);refillEliteVacancies(state,mulberry32(hashString(`${state.seed}|${state.year}|elite-refill`)));evolveEvents(state);prepareSeason(state);state.news.unshift({year:state.year,phase:'preseason',category:'New season',importance:'lead',headline:`Le Grand Braquet presents the ${state.year} peloton`,body:'New sponsors, promoted prospects, director moves, tier changes and revised calendars open another season.'});return{state,opened:true,archive};
+  applyRetirementsAndDevelopment(state);enforceEliteCaps(state);applyTeamLifecycle(state);applySponsors(state);applyFacilities(state);applyDirectorMarket(state);applyTransfers(state);enforceEliteCaps(state);refillEliteVacancies(state,mulberry32(hashString(`${state.seed}|${state.year}|elite-refill`)));evolveEvents(state);prepareSeason(state);compactUciPointLedger(state);state.news.unshift({year:state.year,phase:'preseason',category:'New season',importance:'lead',headline:`Le Grand Braquet presents the ${state.year} peloton`,body:'New sponsors, promoted prospects, director moves, tier changes and revised calendars open another season.'});return{state,opened:true,archive};
 }
 
 export function hallScore(rider){const c=rider.career,details=c.raceWinDetails||[];let major=0;if(details.length){for(const win of details){if(win.eventId==='tour')major+=4200;else if(win.eventId==='giro')major+=3000;else if(win.eventId==='vuelta')major+=2700;else if(win.kind==='monument')major+=650;else if(win.eventId==='worlds-road'||win.eventId==='worlds-tt')major+=1500;else if(win.kind==='championship')major+=500;else if(['stage','u23-stage'].includes(win.kind))major+=180;else major+=100;}}else major=(c.grandTours||0)*3100+(c.monuments||0)*650+(c.worlds||0)*1500+(c.weeklong||0)*200+(c.classics||0)*100;const dominance=Math.max(0,(c.grandTours||0)-2)*420+Math.max(0,(c.monuments||0)-7)*45;return Math.round(major+dominance+(c.stageWins||0)*25+(c.podiums||0)*10+(c.jerseys||0)*20+(c.uciPoints||0)*.04);}

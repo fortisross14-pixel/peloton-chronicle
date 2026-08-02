@@ -1,0 +1,373 @@
+[
+  {
+    "seed": 130013,
+    "year": 2031,
+    "baseDrift": 0,
+    "skillAverageErrors": 0,
+    "rarityRanges": {
+      "generational": {
+        "min": 96,
+        "max": 100
+      },
+      "legend": {
+        "min": 90,
+        "max": 95
+      },
+      "epic": {
+        "min": 85,
+        "max": 90
+      },
+      "rare": {
+        "min": 80,
+        "max": 85
+      },
+      "uncommon": {
+        "min": 70,
+        "max": 80
+      },
+      "common": {
+        "min": 50,
+        "max": 69
+      }
+    },
+    "gtWinners": [
+      {
+        "year": 2026,
+        "race": "Giro d’Italia",
+        "rider": "Viktor Larsson",
+        "rarity": "generational",
+        "base": 100,
+        "rating": 99,
+        "program": "grand-tour",
+        "terrain": "rouleur"
+      },
+      {
+        "year": 2026,
+        "race": "Tour de France",
+        "rider": "Siim Ilves",
+        "rarity": "legend",
+        "base": 94,
+        "rating": 96,
+        "program": "grand-tour",
+        "terrain": "cobbles"
+      },
+      {
+        "year": 2026,
+        "race": "La Vuelta a España",
+        "rider": "Miguel Ramírez",
+        "rarity": "legend",
+        "base": 92,
+        "rating": 90,
+        "program": "grand-tour",
+        "terrain": "puncheur"
+      },
+      {
+        "year": 2027,
+        "race": "Giro d’Italia",
+        "rider": "Viktor Larsson",
+        "rarity": "generational",
+        "base": 100,
+        "rating": 100,
+        "program": "grand-tour",
+        "terrain": "rouleur"
+      },
+      {
+        "year": 2027,
+        "race": "Tour de France",
+        "rider": "Emil Hansen",
+        "rarity": "epic",
+        "base": 89,
+        "rating": 90,
+        "program": "grand-tour",
+        "terrain": "climber"
+      },
+      {
+        "year": 2027,
+        "race": "La Vuelta a España",
+        "rider": "Viktor Larsson",
+        "rarity": "generational",
+        "base": 100,
+        "rating": 100,
+        "program": "grand-tour",
+        "terrain": "rouleur"
+      },
+      {
+        "year": 2028,
+        "race": "Giro d’Italia",
+        "rider": "Viktor Larsson",
+        "rarity": "generational",
+        "base": 100,
+        "rating": 100,
+        "program": "grand-tour",
+        "terrain": "rouleur"
+      },
+      {
+        "year": 2028,
+        "race": "Tour de France",
+        "rider": "Emil Hansen",
+        "rarity": "epic",
+        "base": 89,
+        "rating": 87,
+        "program": "grand-tour",
+        "terrain": "climber"
+      },
+      {
+        "year": 2028,
+        "race": "La Vuelta a España",
+        "rider": "Siim Ilves",
+        "rarity": "legend",
+        "base": 94,
+        "rating": 91,
+        "program": "grand-tour",
+        "terrain": "cobbles"
+      },
+      {
+        "year": 2029,
+        "race": "Giro d’Italia",
+        "rider": "Viktor Larsson",
+        "rarity": "generational",
+        "base": 100,
+        "rating": 100,
+        "program": "grand-tour",
+        "terrain": "rouleur"
+      },
+      {
+        "year": 2029,
+        "race": "Tour de France",
+        "rider": "Diego Díaz",
+        "rarity": "epic",
+        "base": 90,
+        "rating": 91,
+        "program": "grand-tour",
+        "terrain": "puncheur"
+      },
+      {
+        "year": 2029,
+        "race": "La Vuelta a España",
+        "rider": "Viktor Larsson",
+        "rarity": "generational",
+        "base": 100,
+        "rating": 100,
+        "program": "grand-tour",
+        "terrain": "rouleur"
+      },
+      {
+        "year": 2030,
+        "race": "Giro d’Italia",
+        "rider": "Viktor Larsson",
+        "rarity": "generational",
+        "base": 100,
+        "rating": 99,
+        "program": "grand-tour",
+        "terrain": "rouleur"
+      },
+      {
+        "year": 2030,
+        "race": "Tour de France",
+        "rider": "Nils Wagner",
+        "rarity": "legend",
+        "base": 91,
+        "rating": 89,
+        "program": "one-week",
+        "terrain": "all-rounder"
+      },
+      {
+        "year": 2030,
+        "race": "La Vuelta a España",
+        "rider": "Kamil Kamiński",
+        "rarity": "epic",
+        "base": 88,
+        "rating": 87,
+        "program": "grand-tour",
+        "terrain": "puncheur"
+      }
+    ],
+    "lowBaseGtWinners": [],
+    "mountainWinnerClimbing": 80.25858585858586,
+    "mountainWinnerStageFit": 80.13696969696953,
+    "flatWinnerSpeed": 84.045,
+    "flatWinnerStageFit": 82.10479999999998,
+    "yearly": [
+      {
+        "year": 2026,
+        "topRating": 99,
+        "grandTours": [
+          {
+            "year": 2026,
+            "race": "Giro d’Italia",
+            "rider": "Viktor Larsson",
+            "rarity": "generational",
+            "base": 100,
+            "rating": 99,
+            "program": "grand-tour",
+            "terrain": "rouleur"
+          },
+          {
+            "year": 2026,
+            "race": "Tour de France",
+            "rider": "Siim Ilves",
+            "rarity": "legend",
+            "base": 94,
+            "rating": 96,
+            "program": "grand-tour",
+            "terrain": "cobbles"
+          },
+          {
+            "year": 2026,
+            "race": "La Vuelta a España",
+            "rider": "Miguel Ramírez",
+            "rarity": "legend",
+            "base": 92,
+            "rating": 90,
+            "program": "grand-tour",
+            "terrain": "puncheur"
+          }
+        ]
+      },
+      {
+        "year": 2027,
+        "topRating": 100,
+        "grandTours": [
+          {
+            "year": 2027,
+            "race": "Giro d’Italia",
+            "rider": "Viktor Larsson",
+            "rarity": "generational",
+            "base": 100,
+            "rating": 100,
+            "program": "grand-tour",
+            "terrain": "rouleur"
+          },
+          {
+            "year": 2027,
+            "race": "Tour de France",
+            "rider": "Emil Hansen",
+            "rarity": "epic",
+            "base": 89,
+            "rating": 90,
+            "program": "grand-tour",
+            "terrain": "climber"
+          },
+          {
+            "year": 2027,
+            "race": "La Vuelta a España",
+            "rider": "Viktor Larsson",
+            "rarity": "generational",
+            "base": 100,
+            "rating": 100,
+            "program": "grand-tour",
+            "terrain": "rouleur"
+          }
+        ]
+      },
+      {
+        "year": 2028,
+        "topRating": 100,
+        "grandTours": [
+          {
+            "year": 2028,
+            "race": "Giro d’Italia",
+            "rider": "Viktor Larsson",
+            "rarity": "generational",
+            "base": 100,
+            "rating": 100,
+            "program": "grand-tour",
+            "terrain": "rouleur"
+          },
+          {
+            "year": 2028,
+            "race": "Tour de France",
+            "rider": "Emil Hansen",
+            "rarity": "epic",
+            "base": 89,
+            "rating": 87,
+            "program": "grand-tour",
+            "terrain": "climber"
+          },
+          {
+            "year": 2028,
+            "race": "La Vuelta a España",
+            "rider": "Siim Ilves",
+            "rarity": "legend",
+            "base": 94,
+            "rating": 91,
+            "program": "grand-tour",
+            "terrain": "cobbles"
+          }
+        ]
+      },
+      {
+        "year": 2029,
+        "topRating": 100,
+        "grandTours": [
+          {
+            "year": 2029,
+            "race": "Giro d’Italia",
+            "rider": "Viktor Larsson",
+            "rarity": "generational",
+            "base": 100,
+            "rating": 100,
+            "program": "grand-tour",
+            "terrain": "rouleur"
+          },
+          {
+            "year": 2029,
+            "race": "Tour de France",
+            "rider": "Diego Díaz",
+            "rarity": "epic",
+            "base": 90,
+            "rating": 91,
+            "program": "grand-tour",
+            "terrain": "puncheur"
+          },
+          {
+            "year": 2029,
+            "race": "La Vuelta a España",
+            "rider": "Viktor Larsson",
+            "rarity": "generational",
+            "base": 100,
+            "rating": 100,
+            "program": "grand-tour",
+            "terrain": "rouleur"
+          }
+        ]
+      },
+      {
+        "year": 2030,
+        "topRating": 99,
+        "grandTours": [
+          {
+            "year": 2030,
+            "race": "Giro d’Italia",
+            "rider": "Viktor Larsson",
+            "rarity": "generational",
+            "base": 100,
+            "rating": 99,
+            "program": "grand-tour",
+            "terrain": "rouleur"
+          },
+          {
+            "year": 2030,
+            "race": "Tour de France",
+            "rider": "Nils Wagner",
+            "rarity": "legend",
+            "base": 91,
+            "rating": 89,
+            "program": "one-week",
+            "terrain": "all-rounder"
+          },
+          {
+            "year": 2030,
+            "race": "La Vuelta a España",
+            "rider": "Kamil Kamiński",
+            "rarity": "epic",
+            "base": 88,
+            "rating": 87,
+            "program": "grand-tour",
+            "terrain": "puncheur"
+          }
+        ]
+      }
+    ]
+  }
+]

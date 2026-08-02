@@ -1,0 +1,307 @@
+[
+  {
+    "seed": 777331,
+    "year": 2030,
+    "baseDrift": 0,
+    "skillAverageErrors": 0,
+    "rarityRanges": {
+      "generational": {
+        "min": 99,
+        "max": 100
+      },
+      "legend": {
+        "min": 90,
+        "max": 95
+      },
+      "epic": {
+        "min": 85,
+        "max": 90
+      },
+      "rare": {
+        "min": 80,
+        "max": 85
+      },
+      "uncommon": {
+        "min": 70,
+        "max": 80
+      },
+      "common": {
+        "min": 50,
+        "max": 69
+      }
+    },
+    "gtWinners": [
+      {
+        "year": 2026,
+        "race": "Giro d’Italia",
+        "rider": "Unai Navarro",
+        "rarity": "epic",
+        "base": 90,
+        "rating": 88,
+        "program": "grand-tour",
+        "terrain": "all-rounder"
+      },
+      {
+        "year": 2026,
+        "race": "Tour de France",
+        "rider": "Pablo López",
+        "rarity": "generational",
+        "base": 99,
+        "rating": 100,
+        "program": "stage-hunter",
+        "terrain": "cobbles"
+      },
+      {
+        "year": 2026,
+        "race": "La Vuelta a España",
+        "rider": "Unai Navarro",
+        "rarity": "epic",
+        "base": 90,
+        "rating": 88,
+        "program": "grand-tour",
+        "terrain": "all-rounder"
+      },
+      {
+        "year": 2027,
+        "race": "Giro d’Italia",
+        "rider": "Daniel González",
+        "rarity": "generational",
+        "base": 99,
+        "rating": 96,
+        "program": "one-week",
+        "terrain": "all-rounder"
+      },
+      {
+        "year": 2027,
+        "race": "Tour de France",
+        "rider": "Kaito Takahashi",
+        "rarity": "legend",
+        "base": 92,
+        "rating": 92,
+        "program": "grand-tour",
+        "terrain": "time-trialist"
+      },
+      {
+        "year": 2027,
+        "race": "La Vuelta a España",
+        "rider": "Kaito Takahashi",
+        "rarity": "legend",
+        "base": 92,
+        "rating": 92,
+        "program": "grand-tour",
+        "terrain": "time-trialist"
+      },
+      {
+        "year": 2028,
+        "race": "Giro d’Italia",
+        "rider": "Pablo López",
+        "rarity": "generational",
+        "base": 99,
+        "rating": 99,
+        "program": "stage-hunter",
+        "terrain": "cobbles"
+      },
+      {
+        "year": 2028,
+        "race": "Tour de France",
+        "rider": "Bram Smit",
+        "rarity": "legend",
+        "base": 90,
+        "rating": 89,
+        "program": "grand-tour",
+        "terrain": "all-rounder"
+      },
+      {
+        "year": 2028,
+        "race": "La Vuelta a España",
+        "rider": "Pedro Rodrigues",
+        "rarity": "legend",
+        "base": 93,
+        "rating": 88,
+        "program": "one-week",
+        "terrain": "climber"
+      },
+      {
+        "year": 2029,
+        "race": "Giro d’Italia",
+        "rider": "Kaito Takahashi",
+        "rarity": "legend",
+        "base": 92,
+        "rating": 90,
+        "program": "grand-tour",
+        "terrain": "time-trialist"
+      },
+      {
+        "year": 2029,
+        "race": "Tour de France",
+        "rider": "Bram Smit",
+        "rarity": "legend",
+        "base": 90,
+        "rating": 87,
+        "program": "grand-tour",
+        "terrain": "all-rounder"
+      },
+      {
+        "year": 2029,
+        "race": "La Vuelta a España",
+        "rider": "Miguel Martins",
+        "rarity": "epic",
+        "base": 90,
+        "rating": 92,
+        "program": "one-week",
+        "terrain": "puncheur"
+      }
+    ],
+    "lowBaseGtWinners": [],
+    "mountainWinnerClimbing": 80.11111111111111,
+    "mountainWinnerStageFit": 79.37982323232316,
+    "flatWinnerSpeed": 80.68125,
+    "flatWinnerStageFit": 79.94524999999999,
+    "yearly": [
+      {
+        "year": 2026,
+        "topRating": 100,
+        "grandTours": [
+          {
+            "year": 2026,
+            "race": "Giro d’Italia",
+            "rider": "Unai Navarro",
+            "rarity": "epic",
+            "base": 90,
+            "rating": 88,
+            "program": "grand-tour",
+            "terrain": "all-rounder"
+          },
+          {
+            "year": 2026,
+            "race": "Tour de France",
+            "rider": "Pablo López",
+            "rarity": "generational",
+            "base": 99,
+            "rating": 100,
+            "program": "stage-hunter",
+            "terrain": "cobbles"
+          },
+          {
+            "year": 2026,
+            "race": "La Vuelta a España",
+            "rider": "Unai Navarro",
+            "rarity": "epic",
+            "base": 90,
+            "rating": 88,
+            "program": "grand-tour",
+            "terrain": "all-rounder"
+          }
+        ]
+      },
+      {
+        "year": 2027,
+        "topRating": 98,
+        "grandTours": [
+          {
+            "year": 2027,
+            "race": "Giro d’Italia",
+            "rider": "Daniel González",
+            "rarity": "generational",
+            "base": 99,
+            "rating": 96,
+            "program": "one-week",
+            "terrain": "all-rounder"
+          },
+          {
+            "year": 2027,
+            "race": "Tour de France",
+            "rider": "Kaito Takahashi",
+            "rarity": "legend",
+            "base": 92,
+            "rating": 92,
+            "program": "grand-tour",
+            "terrain": "time-trialist"
+          },
+          {
+            "year": 2027,
+            "race": "La Vuelta a España",
+            "rider": "Kaito Takahashi",
+            "rarity": "legend",
+            "base": 92,
+            "rating": 92,
+            "program": "grand-tour",
+            "terrain": "time-trialist"
+          }
+        ]
+      },
+      {
+        "year": 2028,
+        "topRating": 99,
+        "grandTours": [
+          {
+            "year": 2028,
+            "race": "Giro d’Italia",
+            "rider": "Pablo López",
+            "rarity": "generational",
+            "base": 99,
+            "rating": 99,
+            "program": "stage-hunter",
+            "terrain": "cobbles"
+          },
+          {
+            "year": 2028,
+            "race": "Tour de France",
+            "rider": "Bram Smit",
+            "rarity": "legend",
+            "base": 90,
+            "rating": 89,
+            "program": "grand-tour",
+            "terrain": "all-rounder"
+          },
+          {
+            "year": 2028,
+            "race": "La Vuelta a España",
+            "rider": "Pedro Rodrigues",
+            "rarity": "legend",
+            "base": 93,
+            "rating": 88,
+            "program": "one-week",
+            "terrain": "climber"
+          }
+        ]
+      },
+      {
+        "year": 2029,
+        "topRating": 100,
+        "grandTours": [
+          {
+            "year": 2029,
+            "race": "Giro d’Italia",
+            "rider": "Kaito Takahashi",
+            "rarity": "legend",
+            "base": 92,
+            "rating": 90,
+            "program": "grand-tour",
+            "terrain": "time-trialist"
+          },
+          {
+            "year": 2029,
+            "race": "Tour de France",
+            "rider": "Bram Smit",
+            "rarity": "legend",
+            "base": 90,
+            "rating": 87,
+            "program": "grand-tour",
+            "terrain": "all-rounder"
+          },
+          {
+            "year": 2029,
+            "race": "La Vuelta a España",
+            "rider": "Miguel Martins",
+            "rarity": "epic",
+            "base": 90,
+            "rating": 92,
+            "program": "one-week",
+            "terrain": "puncheur"
+          }
+        ]
+      }
+    ]
+  }
+]
