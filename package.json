@@ -1,13 +1,13 @@
 {
   "name": "peloton-chronicle",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test",
+    "test": "node --test tests/engine.test.js",
     "build:fallback": "node scripts/build.mjs"
   },
   "dependencies": {

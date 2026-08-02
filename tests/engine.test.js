@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createUniverse, hallScore, openNextSeason, simulateNextEvent, simulateSeason, simulateWeeks, uciRankings, upgradeUniverse } from '../src/engine.js';
-import { renderDirectorPageForTest, renderFilteredResultsForTest, renderPageForTest, renderRiderPageForTest, renderTeamPageForTest } from '../src/app.js';
+import { createUniverse, ELITE_TARGETS, facilityUpgradeCost, hallScore, openNextSeason, simulateNextEvent, simulateSeason, simulateWeeks, uciRankings, upgradeUniverse } from '../src/engine.js';
+import { renderDirectorPageForTest, renderFilteredResultsForTest, renderPageForTest, renderRiderPageForTest, renderRidersForTest, renderTeamPageForTest, renderTeamsForTest } from '../src/app.js';
 
 test('creates the intended modern cycling world', () => {
   const state = createUniverse({ seed: 42 });
@@ -128,6 +128,26 @@ test('keeps a five-season chronicle structurally valid', () => {
   assert.equal(new Set(rosterIds).size, rosterIds.length);
   assert.equal(active.length, rosterIds.length);
   assert.equal(active.filter(rider => rider.tier === 'u23' && rider.age > 22).length, 0);
+  for (const [rarity, target] of Object.entries(ELITE_TARGETS)) assert.equal(active.filter(rider => rider.rarity === rarity).length, target);
+  assert.equal(active.filter(rider => rider.potential >= 90 && rider.age >= 23 && rider.tier !== 'worldtour').length, 0);
+  for (const team of state.teams.filter(team => team.status === 'active')) {
+    assert.ok(team.primarySponsor?.name && team.secondarySponsor?.name);
+    assert.ok(team.facilities >= 1 && team.facilities <= 10);
+  }
+  const yearsByDirector = new Map();
+  for (const move of [...state.directorMoves].reverse()) {
+    const years = yearsByDirector.get(move.directorId) || [];
+    years.push(move.year);
+    yearsByDirector.set(move.directorId, years);
+  }
+  for (const years of yearsByDirector.values()) for (let index = 1; index < years.length; index += 1) assert.ok(years[index] - years[index - 1] >= 2);
+  assert.ok(state.sponsorLog.length > 0);
+  assert.ok(state.tierChanges.length > 0);
+  for (let year = 2027; year <= 2031; year += 1) {
+    const eliteMoves = state.transfers.filter(move => move.year === year && ['generational', 'legend', 'epic'].includes(move.rarity));
+    assert.ok(eliteMoves.length <= 6, `elite market should remain selective in ${year}`);
+    assert.equal(eliteMoves.filter(move => move.fromTier === 'worldtour' && move.toTier !== 'worldtour').length, 0);
+  }
   assert.ok(JSON.stringify(state).length < 16_000_000);
 });
 
@@ -202,7 +222,33 @@ test('career plans are chronological and retirement targets are plausible',()=>{
   for(const rider of state.riders.filter(r=>!r.retired)){
     assert.ok(rider.retirementAge>=28);
     assert.ok(rider.careerLength>=10);
+    const careerYear=state.year-rider.debutYear+1;
+    assert.ok(careerYear>=1&&careerYear<=rider.careerLength);
     const dates=rider.targetEvents.map(id=>state.events.find(e=>e.id===id)).filter(Boolean).map(e=>e.month*100+e.day);
     assert.deepEqual(dates,[...dates].sort((a,b)=>a-b));
   }
+});
+
+
+
+
+test('facility investment becomes sharply more expensive near level ten', () => {
+  assert.ok(facilityUpgradeCost(9.5, 10, 'worldtour') > facilityUpgradeCost(6, 6.5, 'worldtour') * 3);
+});
+
+test('rider and team filters and expanded economy cards render correctly', () => {
+  const state = createUniverse({ seed: 445566 });
+  const proTeams = renderTeamsForTest(state, { tier: 'proseries', sort: 'budget' });
+  assert.match(proTeams, /Sort: budget/);
+  assert.match(proTeams, /ProSeries/);
+  assert.doesNotMatch(proTeams, /data-open-team-page="alpecin"/);
+  const generational = renderRidersForTest(state, { rarity: 'generational' });
+  assert.match(generational, /3 matching riders/);
+  assert.match(generational, /Y\d+\/\d+/);
+  assert.doesNotMatch(generational, /rarity legend/);
+  const team = state.teams.find(item => item.tier === 'worldtour');
+  const teamPage = renderTeamPageForTest(state, team.id, 'overview');
+  assert.match(teamPage, /Primary · team name/);
+  assert.match(teamPage, /Secondary · maillot/);
+  assert.match(teamPage, /Projected balance/);
 });

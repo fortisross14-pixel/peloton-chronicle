@@ -1,10 +1,38 @@
-# Peloton Chronicle v0.7
+# Peloton Chronicle v1.2
 
-Results home now begins with rolling UCI rider/team rankings, the last three winners, Grand Tour watch cards, and top-three race/stage leaders. Calendar tier and type filters are stateful and rebuild the calendar correctly.
+A Vite + React modern-era professional road-cycling world simulation. The universe advances by calendar weeks while riders, directors, team organizations, sponsors, race editions and completed seasons remain searchable in a permanent historical archive.
 
-# Peloton Chronicle v0.4
+## v1.2 Director's Cut visual release
 
-A Vite + React modern-era professional road-cycling world simulation. The universe advances by calendar weeks rather than one race at a time, while riders, directors, team organizations, sponsor identities, race editions and completed seasons remain searchable in a permanent historical archive.
+- **Retro-serious identity:** a mid-century European cycling annual interpreted with modern spacing, responsiveness and interaction—not pixel art or a faux-old software interface.
+- **Fixed rarity language:** Generational red, Legend gold, Epic purple, Rare blue, Uncommon green and Common white across cards, profiles and market records.
+- **Stronger editorial hierarchy:** refined masthead, issue-style page headers, consistent display/body type scales and clearer supporting copy.
+- **Modern card system:** rebuilt rider, team and director cards with sponsor stripes, stronger ratings, readable career chips, larger statistics and more disciplined spacing.
+- **Grand Tour identity:** Giro, Tour and Vuelta receive distinct editorial hero treatments while retaining the same navigation and data.
+- **Sponsor branding:** team primary/secondary colors now read more clearly across cards, profile heroes and finance panels.
+- **Data clarity:** larger tables, stronger numeric alignment, improved row states, clearer filters and more legible mobile layouts.
+- **Magazine and Hall of Fame presentation:** Le Grand Braquet and historical pages now feel like premium cycling annual features rather than generic lists.
+- **Restrained motion:** subtle lift, focus and toast transitions provide a modern-game feel without breaking the archival tone.
+- **No navigation changes:** routes, tabs, filters, save compatibility and simulation behavior remain unchanged.
+
+The full visual language is documented in `DESIGN_v1.2.md`. Validation is summarized in `QA_REPORT_v1.2.md`.
+
+## v1.1 systems expansion
+
+- **Controlled elite population:** exactly 3 active Generational riders, 9 Legends and 18 Epics. A replacement prospect appears only when an elite rider retires.
+- **Elite scouting:** riders with 90+ potential are pulled into WorldTour projects as they approach their prime. Elite riders already established in WorldTour cannot casually fall into ProSeries because of ordinary roster filling.
+- **Selective transfer market:** happiness, salary versus market value, contract status, facilities, results, director quality and team ambition determine movement. Elite transfer windows are deliberately small.
+- **Sponsor economy:** every active team has a primary naming sponsor and secondary maillot sponsor, each with size, money, attraction and colors. Sponsor exits can strengthen or weaken the entire project.
+- **Team finances:** sponsor income and prize money fund rider salaries, director salaries and facilities investment. Team pages show the full annual projection.
+- **Facilities:** levels run from 1–10, decay over time and use a sharply nonlinear upgrade cost near the elite end.
+- **Director market:** directors have salaries, contracts and happiness. They can be dismissed, hired from agencies or poached, but cannot switch appointments twice inside two seasons.
+- **Tier movement:** WorldTour/ProSeries and ProSeries/Continental promotion and relegation are recorded in the preseason Chronicle.
+- **Working filters and sorting:** rider rarity/tier filters and team tier filters are stateful; teams can be sorted by points, budget, facilities, attraction, reputation or director ability.
+- **Navigation history:** rider, team, director and race pages return to the actual source screen rather than always returning to a generic list.
+- **Clear participation statuses:** targets distinguish not disputed, team not invited, rider not selected and finished outside the recorded top 20.
+- **Le Grand Braquet preseason:** curated elite signings, elite prospects, retirements, sponsor changes, director appointments and promotion/relegation replace the previous unstructured transfer dump.
+
+The functional and technical rules are documented in `MECHANICS_v1.1.md`. Deterministic system results are in `QA_SYSTEMS_v1.1.md`.
 
 ## Install and run
 
@@ -52,9 +80,9 @@ Run `npm run build`, then upload the contents of `dist/` to the web root.
 
 ## Save architecture
 
-Peloton Chronicle v0.4 does **not** require Neon or another backend. Universes are stored in IndexedDB, with three save drawers and JSON export. Saves remain local to the browser and device. Clearing browser site data deletes local universes, so use **Save & Settings → Export JSON** for external backups.
+Peloton Chronicle v1.2 does **not** require Neon or another backend. Universes are stored in IndexedDB, with three save drawers and JSON export. Saves remain local to the browser and device. Clearing browser site data deletes local universes, so use **Save & Settings → Export JSON** for external backups.
 
-Existing v0.1/v0.2 universes are upgraded when opened. A new universe is still recommended when testing generation or balance changes because an old save preserves its existing population and prior results.
+Existing older universes are upgraded when opened. A new universe is still recommended when testing generation or balance changes because an old save preserves its existing population and prior results.
 
 ## v0.4 highlights
 
@@ -75,7 +103,7 @@ Existing v0.1/v0.2 universes are upgraded when opened. A new universe is still r
 - Fully procedural riders from a broad country and name database
 - Separate race preference and stage/terrain specialization
 - U23 entry at age 18–19; professional eligibility from age 21; development capped before age 23
-- Early-bloomer, stable and late-bloomer curves with generated 9–15-year career lengths
+- Early-bloomer, stable and late-bloomer curves with retirement targets from age 28, most commonly 30–33
 - Target calendars, fatigue, form, protected peaks and race-day accumulation
 - Race directors for every team plus agency markets and career progression
 - Dynamic sponsors, promotion/relegation, team closures, new projects and changing race prestige
