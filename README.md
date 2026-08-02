@@ -112,3 +112,23 @@ Existing v0.1/v0.2 universes are upgraded when opened. A new universe is still r
 - Grand Tour achievements carry substantially more Hall of Fame weight.
 - Exceptional riders receive more cross-specialty flexibility, while specialists retain an advantage.
 - WorldTour recruitment places a stronger premium on 90+ potential riders.
+
+
+## v0.9 balance update
+
+- Rider current-season plans are grouped chronologically by month.
+- Retirement targets now begin at 28, with most riders targeting ages 30–33 and elite riders sometimes lasting longer.
+- Grand Tour GC strongly rewards sustained ability, team support, recovery and Grand Tour suitability; low-rated riders can still win stages but are now extraordinarily unlikely to win the overall classification.
+- Grand Tour gaps are more competitive rather than clustering at the cap.
+- Classics repeat-win pressure limits implausible four-year totals while preserving elite specialist dynasties.
+- Generational riders receive a small number of cross-program targets so Merckx/Pogačar-style careers can emerge.
+- See `QA_BALANCE_v0.9.md` for deterministic test notes.
+
+
+## v1.0 final polish
+
+- Final deterministic narrative-balance pass for dynasties, rivals, interrupted peaks and elite-team recruitment.
+- Refined generational longevity and repeat-major experience without hard caps on Grand Tours or Monuments.
+- Complete typography, spacing, link-state, card, table and mobile consistency audit.
+- The visual system remains an old European cycling almanac: cream stock, burgundy ink, brass accents and editorial serif display type.
+- See `QA_BALANCE_v1.0.md` for the final fixed-seed benchmark.

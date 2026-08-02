@@ -196,3 +196,13 @@ test('uses realistic Grand Tour gaps and official-style UCI ranking values',()=>
   const tourWinner=ranking.riders.find(row=>row.id===tour.winnerId);
   assert.ok(tourWinner.points>=1300);
 });
+
+test('career plans are chronological and retirement targets are plausible',()=>{
+  const state=createUniverse({seed:909});
+  for(const rider of state.riders.filter(r=>!r.retired)){
+    assert.ok(rider.retirementAge>=28);
+    assert.ok(rider.careerLength>=10);
+    const dates=rider.targetEvents.map(id=>state.events.find(e=>e.id===id)).filter(Boolean).map(e=>e.month*100+e.day);
+    assert.deepEqual(dates,[...dates].sort((a,b)=>a-b));
+  }
+});
