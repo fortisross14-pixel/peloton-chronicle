@@ -324,3 +324,37 @@ test('rider overview exposes the fixed base, multiplier and individual skills', 
   assert.match(page, /Rider skills/);
   assert.match(page, /Mental strength/);
 });
+
+test('rider totals, season programme, annual record and UCI ledger share the official race results', () => {
+  const state = createUniverse({ seed: 20260803 });
+  simulateSeason(state);
+  const giroResult = state.eventResults.find(result => result.eventId === 'giro');
+  assert.ok(giroResult);
+  const rider = state.riders.find(item => item.id === giroResult.winnerId);
+  assert.ok(rider);
+
+  // Reproduce the reported case: the rider won a race that was not one of the
+  // original calendar targets. The official start must still be visible.
+  rider.targetEvents = rider.targetEvents.filter(id => id !== 'giro');
+
+  const officialRaceWins = state.eventResults.filter(result => result.winnerId === rider.id).length;
+  const officialStageWins = state.eventResults.flatMap(result => result.stages || []).filter(stage => stage.winnerId === rider.id).length;
+  const officialPoints = state.uciPointEvents.filter(row => row.year === state.year && row.riderId === rider.id).reduce((sum, row) => sum + row.points, 0);
+  assert.equal(rider.currentSeason.raceWins, officialRaceWins);
+  assert.equal(rider.currentSeason.stageWins, officialStageWins);
+  assert.equal(rider.currentSeason.uciPoints, officialPoints);
+  assert.ok(rider.currentSeason.raceWinDetails.some(win => win.eventId === 'giro'));
+  assert.ok(rider.currentSeason.grandTours >= 1);
+
+  const programme = renderRiderPageForTest(state, rider.id, 'season');
+  const history = renderRiderPageForTest(state, rider.id, 'history');
+  assert.match(programme, /Giro d’Italia/);
+  assert.match(programme, /Winner/);
+  assert.match(programme, /Official start/);
+  assert.match(history, /Giro d’Italia/);
+  assert.match(history, new RegExp(`${officialPoints.toLocaleString('en-US').replaceAll(',', ',?')}|${officialPoints}`));
+
+  const archived = rider.career.seasons.find(season => season.year === state.year);
+  assert.ok(archived?.raceWinDetails?.some(win => win.eventId === 'giro'));
+  assert.equal(archived.points, officialPoints);
+});
