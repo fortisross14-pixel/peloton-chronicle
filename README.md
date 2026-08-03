@@ -1,178 +1,245 @@
-# Peloton Chronicle v1.3
+# Peloton — The Season Almanac
 
-A Vite + React modern-era professional road-cycling world simulation. The universe advances by calendar weeks while riders, directors, team organizations, sponsors, race editions and completed seasons remain searchable in a permanent historical archive.
+A complete cycling season simulator. Twelve teams. One hundred and twenty riders.
+Twenty races a year. Grand Tours, classics, and the long campaign for the world ranking.
 
+Built with Vite + React + TypeScript + Tailwind + Zustand. Single-page, runs in the
+browser, persists to `localStorage`.
 
-## v1.3 rider skill model
-
-- **Rarity fixes base talent:** Generational 95–100, Legend 90–95, Epic 85–90, Rare 80–85, Uncommon 70–80 and Common 50–69.
-- **Base skill never changes:** the value assigned at spawn remains fixed through retirement.
-- **Annual rating is mathematical:** `round(base skill × annual multiplier)`, where the multiplier combines the career curve and deterministic yearly shape and is capped between 0.70 and 1.02.
-- **Nine visible skills:** speed, acceleration, power, climbing, endurance, recovery, bike control, strategy and mental strength.
-- **Specialization redistributes talent:** a climber and sprinter with the same base and annual multiplier have the same average rating, but different skill shapes.
-- **Stage results use skill blends:** mountain, flat, hilly, puncheur, time-trial and cobbled stages each weight the relevant skills differently.
-- **Race preference remains separate:** Grand Tour, one-week, Monument and stage-hunter preferences affect preparation and race suitability, not the underlying skill average.
-- **Condition is contextual:** form, fatigue, targeting, team support, facilities and director quality affect race-day performance without changing the displayed annual rating.
-- **Rider overview expanded:** full skill grid, fixed base skill, exact annual factor and current average are now visible.
-- **Existing saves upgrade:** old base values are proportionally mapped into the new rarity bands and receive deterministic skills without losing history.
-
-The full formula and stage weight table are documented in `SKILL_MODEL_v1.3.md`. Fixed-seed validation is in `QA_SKILLS_v1.3.md`.
-
-## v1.2 Director's Cut visual release
-
-- **Retro-serious identity:** a mid-century European cycling annual interpreted with modern spacing, responsiveness and interaction—not pixel art or a faux-old software interface.
-- **Fixed rarity language:** Generational red, Legend gold, Epic purple, Rare blue, Uncommon green and Common white across cards, profiles and market records.
-- **Stronger editorial hierarchy:** refined masthead, issue-style page headers, consistent display/body type scales and clearer supporting copy.
-- **Modern card system:** rebuilt rider, team and director cards with sponsor stripes, stronger ratings, readable career chips, larger statistics and more disciplined spacing.
-- **Grand Tour identity:** Giro, Tour and Vuelta receive distinct editorial hero treatments while retaining the same navigation and data.
-- **Sponsor branding:** team primary/secondary colors now read more clearly across cards, profile heroes and finance panels.
-- **Data clarity:** larger tables, stronger numeric alignment, improved row states, clearer filters and more legible mobile layouts.
-- **Magazine and Hall of Fame presentation:** Le Grand Braquet and historical pages now feel like premium cycling annual features rather than generic lists.
-- **Restrained motion:** subtle lift, focus and toast transitions provide a modern-game feel without breaking the archival tone.
-- **No navigation changes:** routes, tabs, filters, save compatibility and simulation behavior remain unchanged.
-
-The full visual language is documented in `DESIGN_v1.2.md`. Validation is summarized in `QA_REPORT_v1.2.md`.
-
-## v1.1 systems expansion
-
-- **Controlled elite population:** exactly 3 active Generational riders, 9 Legends and 18 Epics. A replacement prospect appears only when an elite rider retires.
-- **Elite scouting:** riders with 90+ potential are pulled into WorldTour projects as they approach their prime. Elite riders already established in WorldTour cannot casually fall into ProSeries because of ordinary roster filling.
-- **Selective transfer market:** happiness, salary versus market value, contract status, facilities, results, director quality and team ambition determine movement. Elite transfer windows are deliberately small.
-- **Sponsor economy:** every active team has a primary naming sponsor and secondary maillot sponsor, each with size, money, attraction and colors. Sponsor exits can strengthen or weaken the entire project.
-- **Team finances:** sponsor income and prize money fund rider salaries, director salaries and facilities investment. Team pages show the full annual projection.
-- **Facilities:** levels run from 1–10, decay over time and use a sharply nonlinear upgrade cost near the elite end.
-- **Director market:** directors have salaries, contracts and happiness. They can be dismissed, hired from agencies or poached, but cannot switch appointments twice inside two seasons.
-- **Tier movement:** WorldTour/ProSeries and ProSeries/Continental promotion and relegation are recorded in the preseason Chronicle.
-- **Working filters and sorting:** rider rarity/tier filters and team tier filters are stateful; teams can be sorted by points, budget, facilities, attraction, reputation or director ability.
-- **Navigation history:** rider, team, director and race pages return to the actual source screen rather than always returning to a generic list.
-- **Clear participation statuses:** targets distinguish not disputed, team not invited, rider not selected and finished outside the recorded top 20.
-- **Le Grand Braquet preseason:** curated elite signings, elite prospects, retirements, sponsor changes, director appointments and promotion/relegation replace the previous unstructured transfer dump.
-
-The functional and technical rules are documented in `MECHANICS_v1.1.md`. Deterministic system results are in `QA_SYSTEMS_v1.1.md`.
-
-## Install and run
-
-Use Node.js 20.19 or newer.
+## Quick start
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open the local URL shown by Vite, normally `http://localhost:5173/`.
+Then open `http://localhost:5173`.
 
-## Production build
+To produce a static build:
 
 ```bash
 npm run build
+npm run preview
 ```
 
-Vite creates the deployable site in `dist/`. The included `vite.config.js` uses relative asset paths, so the build works on GitHub Pages subdirectories and root-domain hosts.
+The build is fully static — no backend, no API. `dist/` can be hosted anywhere.
 
-A no-bundler emergency build is also available:
+## How to play
 
-```bash
-npm run build:fallback
+1. **New Universe** on the home screen. A seed is generated, 12 teams and 120 riders
+   are created, and the calendar is laid out (March → October).
+2. The **Calendar** screen shows the season. Click **Sign On** to start the next race.
+3. In the **Race** screen, click **Simulate Next Step** repeatedly:
+   - A classic resolves in one click.
+   - A week-long stage race takes 2 clicks (about 4 stages each).
+   - A Grand Tour takes 7 clicks (3 stages each).
+   - Each step shows the top 3 of every stage in that step, plus the GC top 10
+     and team top 3 after the step.
+4. When the race finishes you see the final GC top 10 and the jersey winners
+   (yellow / green / polka / youth / team). Click **Continue Season**.
+5. Once all 20 races are done, click **Advance to {year+1}**. The off-season
+   handles retirements, transfers, and rookie generation, then the next year begins.
+
+Click any rider or team name anywhere to drill into their detail page (career
+history, year-by-year results, jersey case, all-time totals).
+
+The **Almanac** tab is the historical archive: all-time leaderboards (active +
+retired) and Hall of Fame champions by year.
+
+## Design notes
+
+### Riders
+
+- 120 riders, 10 per team, generated procedurally on **New Universe**.
+- **Rarity** rolled at creation: Legend 3% / Epic 12% / Rare 25% / Uncommon 35% / Common 25%.
+- **Skills** (climbing, sprinting, time trial, cobbles, endurance, descending, breakaway)
+  are bounded by rarity:
+  - Legend: 88–99 across the board
+  - Epic: 1–2 standout skills 90–99, rest 78–89
+  - Rare: 1–2 good skills 78–88, rest 68–78
+  - Uncommon: 60–75 across
+  - Common: 45–65 across
+- **Leadership** is rolled independently (uniform 30–99). A Common can have 90 leadership
+  and become a beloved captain — leadership decides team time-trial outcomes alongside
+  the director rating.
+- **Consistency** (40–95) is a variance reducer. High-consistency riders perform
+  near their expected level; low-consistency riders swing wider day to day.
+- **Career** is 9–12 years long. First 2 years = rookie at 80% potential (and
+  eligible for the youth jersey). Middle years = 100%. Penultimate year = 90%,
+  final year = 80%. Then retire.
+- Year 1 generates riders at varied ages (20–32) so retirements happen
+  immediately and the universe doesn't feel sterile.
+
+### Teams
+
+Twelve fixed teams, each with a unique identity, color, emoji, and **bonus**:
+
+| Team | Country | Bonus |
+|---|---|---|
+| 🇮🇹 Squadra Celeste | ITA | +3% during the Giro d'Italia |
+| ⛰️ Banesto-Iberia | ESP | +3% during the Vuelta a España |
+| 🌾 Mistral-Provence | FRA | +3% during the Tour de France |
+| ⚡ Albion Sky | GBR | +2% on individual & team time trials |
+| 🧱 Vlaanderen Pavé | BEL | +5% on cobbled stages |
+| 🟧 Oranje Crono | NED | +4% on flat stages (sprint train) |
+| 🛡️ Nordkraft | DEN | Rookies more likely to roll Rare+ |
+| 🦅 Telekom Berg | GER | First pick of free agents |
+| ☕ Café de Colombia | COL | +4% on mountain stages |
+| 🕰️ Helvetia Crono | SUI | +1.5% all stages, +3% on TT |
+| 🐊 Crocodile Trek | USA | +1% on every stage type |
+| 🎯 Adriatica Veloce | ITA | +4% on classics & monuments |
+
+Bonuses **compound** with the director's per-skill boosts. So a Tour Specialist
+team with a Legend GT director hammering climbing gets both bonuses on a Tour
+mountain stage.
+
+Riders are biased toward each team's home nation (~50% chance) — Café de
+Colombia gets more Colombian climbers, Vlaanderen Pavé gets more Belgians.
+
+### Directors
+
+- Each team has one director. Rarity-rolled the same way as riders.
+- Directors also have a **specialty** (gt / classics / sprints / mountains /
+  cobbles / tt / youth / allround) — their skill boosts skew toward that area.
+- 16 directors exist at any time: 12 employed + 4 free agents.
+- **Offseason director cycle**:
+  - The bottom 1–2 teams fire their director.
+  - They hire the best matching free agent (specialty match prioritized,
+    then rarity).
+  - The pool tops up with new directors as needed and the worst free agents
+    age out so the total stays at 16.
+- Directors track years-active and titles-won; both shown on the team page.
+- Boost magnitudes:
+  - Legend: 5% on all skills, 6% on favored
+  - Epic: 5% favored / 3% rest
+  - Rare: 3% all except one at 1%
+  - Uncommon: 3% favored / 1% rest
+  - Common: 2% favored / 1% rest
+
+### Calendar
+
+20 events per year (sorted by month):
+- **3 Grand Tours**: Giro (May), Tour (July), Vuelta (August).
+- **5 stage races**: Paris–Nice, Tirreno–Adriatico, Volta a Catalunya,
+  Critérium du Dauphiné, Tour de Suisse.
+- **5 monuments**: Milano–Sanremo, Tour of Flanders, Paris–Roubaix,
+  Liège–Bastogne–Liège, Il Lombardia.
+- **6 classics**: Strade Bianche, Gent–Wevelgem, Amstel Gold, Flèche Wallonne,
+  San Sebastián, Milano–Torino.
+- **Worlds**: late September.
+
+### Roster selection
+
+Auto-selected per race:
+- **Grand Tour**: 8 riders. Engine ensures every rider does at least one Grand Tour
+  per season — riders who haven't done a GT yet get priority as the calendar runs out.
+- **Week-long stage race**: 7 riders.
+- **Classic / Monument**: 5 riders.
+
+Selection score blends specialty match (climbing for Lombardia, cobbles for
+Roubaix, sprinting + endurance for Sanremo, etc.) with the GT-quota boost.
+
+### Race simulation
+
+Each stage type weights skills differently — mountain stages reward climbing +
+endurance, ITT rewards time trial, cobbles rewards cobbles, etc. A rider's
+"score" for a stage is `base_skill × phase_multiplier × (1 + director_boost) +
+random_variance`. Variance is gaussian, scaled by `(100 - consistency)`.
+
+Time gaps come from score differences scaled by stage type:
+- Flat stages produce a peloton (most riders share the winner's time, "s.t.")
+- Mountain-hard stages can produce 2–3 minute gaps
+- ITT gaps scale with distance
+
+In Grand Tours, riders with low endurance lose time progressively — the third
+week is brutal for non-climbers. This is what makes a Tour podium look different
+from a Strade Bianche podium.
+
+**Team time trials** are computed per team:
+captain leadership + director TT boost + average team TT/endurance. All eight
+riders of a team share the team's time. A weak team with a great GC rider will
+lose minutes to a strong team here.
+
+### Scoring
+
+- GC points table: 500/400/325/.../2 for top 30, multiplied by event prestige
+  (Tour 1.5, Giro & Vuelta 1.3, Worlds 0.95, Monuments 0.85, week races 0.7–0.8,
+  classics 0.6).
+- Stage win points: 50/30/20/12/6 for top 5 per stage.
+- Jersey bonuses (event-end): points 100, mountain 100, youth 80, team 75 — all
+  scaled by prestige.
+- **Team season points = sum of top 10 riders' season points**, so depth matters
+  but a single megastar can't carry the team alone.
+
+### Off-season
+
+When the calendar is exhausted:
+1. Hall of Fame entry saved for the year (champion + team champion + GT winners).
+2. Team season records saved with rankings.
+3. Riders age +1; anyone past their career length retires.
+4. **Transfers**: 8–10 random active riders switch teams.
+5. Any team over 10 releases its lowest-rated surplus to a free pool.
+6. Free agents distributed to teams below 10.
+7. Teams still under 10 generate fresh rookies (rarity-rolled, age 20).
+8. Calendar stage distances re-rolled. Year advances.
+
+## Editing the content layer
+
+All names are procedural. To swap in your own:
+- **Rider names** — `src/data/names.ts`. Edit `FIRST_NAMES_BY_NATION` and
+  `LAST_NAMES_BY_NATION`. The `NATIONALITIES` array decides which nations exist.
+- **Team names** — `src/data/names.ts`, `TEAM_NAME_POOLS.sponsors`. The first
+  12 (after shuffling per universe) get used.
+- **Director surnames** — `src/data/names.ts`, `DIRECTOR_LASTNAMES`.
+- **Calendar** — `src/data/calendar.ts`. Add/remove events, edit stage profiles
+  for the Grand Tours and week races, change prestige multipliers.
+
+After editing names, click **new game** in the header (top right) — the saved
+universe is regenerated with the new content.
+
+## Project layout
+
+```
+src/
+├── App.tsx                  # Top-level routing
+├── main.tsx                 # Bootstrap
+├── index.css                # Tailwind + paper aesthetic
+├── components/              # All views
+│   ├── Home.tsx
+│   ├── Header.tsx
+│   ├── CalendarView.tsx
+│   ├── RaceView.tsx
+│   ├── StandingsView.tsx
+│   ├── TeamsView.tsx
+│   ├── TeamDetailView.tsx
+│   ├── RiderDetailView.tsx
+│   └── HistoryView.tsx
+├── data/
+│   ├── calendar.ts          # 20-event calendar + stage profiles
+│   ├── generators.ts        # Rider/director/team/universe creation
+│   └── names.ts             # Content layer — edit freely
+├── engine/
+│   ├── simulate.ts          # Stage simulation + classifications
+│   ├── scoring.ts           # Points awards
+│   ├── season.ts            # Race lifecycle (start/step/finish)
+│   └── offseason.ts         # Retirements, transfers, rookies
+├── state/
+│   └── store.ts             # Zustand store + localStorage persistence
+├── types/
+│   └── index.ts             # All shared types
+└── utils/
+    └── random.ts            # Mulberry32 PRNG, time formatting, etc.
 ```
 
-## Publish
+## Known quirks
 
-### GitHub Pages automatically
+- The simulation is deterministic per seed: same seed + same inputs → same
+  results. Each race uses a sub-seed derived from `(universe.seed, year, event,
+  step)` so results are reproducible.
+- Riders generated mid-career (year-1 riders aged 20–32) get extended career
+  lengths so they always have at least 2 years remaining when the universe boots.
+- Saving is automatic on every meaningful action (start race, step, finish race,
+  end season). The save key is `peloton.v1`. To wipe and restart, click
+  **new game** in the header.
 
-1. Create a GitHub repository and push this project to its `main` branch.
-2. Open **Settings → Pages** in GitHub.
-3. Under **Build and deployment**, choose **GitHub Actions**.
-4. The included `.github/workflows/deploy-pages.yml` installs dependencies, runs the automated tests, builds the project and publishes `dist/` after every push to `main`.
-
-### Netlify or Cloudflare Pages
-
-- Build command: `npm run build`
-- Publish directory: `dist`
-- Node version: `22`
-
-### Manual static hosting
-
-Run `npm run build`, then upload the contents of `dist/` to the web root.
-
-## Save architecture
-
-Peloton Chronicle v1.3 does **not** require Neon or another backend. Universes are stored in IndexedDB, with three save drawers and JSON export. Saves remain local to the browser and device. Clearing browser site data deletes local universes, so use **Save & Settings → Export JSON** for external backups.
-
-Existing older universes are upgraded when opened. A new universe is still recommended when testing generation or balance changes because an old save preserves its existing population and prior results.
-
-## v0.4 highlights
-
-- **End of year is now a hard season stop.** Simulation finishes on December 31 of the current year, preserves the complete race desk and displays a dedicated season-review front page. Only the explicit **Move to next year** action archives and resets the calendar.
-- The year-end review shows the world number one, leading team, race/stage leaders and the Giro, Tour and Vuelta podiums at a glance.
-- Older v0.1–v0.3 saves automatically reconstruct missing opening-year race, stage and jersey details from permanent race editions. Totals such as “11 stages” now recover the exact races and profiles whenever those editions exist in the save.
-- Rider yearly records group stage victories by profile and jersey victories by classification, for example **Mountains ×7 — Vuelta a España; Volta a Catalunya**.
-- Teams now have dedicated full pages with sponsor lineage, current roster and an exact annual list of races, stages and jerseys won.
-- Race directors now have dedicated full pages with appointment-by-appointment annual results and exact victories under each team.
-- Team and director cards open their full pages directly; modal dossiers reached from other screens retain an **Open full details** action.
-- Existing permanent race pages continue to show GC, points, mountains and young-rider winners for every edition.
-- Results filters, race links, weekly simulation and the balanced elite-career model from v0.3 remain intact.
-
-## Core world structure
-
-- 18 active WorldTeams and 16 active ProTeams
-- U23 national development programs and a deliberately lightweight continental/free-agent layer
-- Fully procedural riders from a broad country and name database
-- Separate race preference and stage/terrain specialization
-- U23 entry at age 18–19; professional eligibility from age 21; development capped before age 23
-- Early-bloomer, stable and late-bloomer curves with retirement targets from age 28, most commonly 30–33
-- Target calendars, fatigue, form, protected peaks and race-day accumulation
-- Race directors for every team plus agency markets and career progression
-- Dynamic sponsors, promotion/relegation, team closures, new projects and changing race prestige
-- Locally bundled country flags for consistent browser and Windows rendering
-
-## v0.7 ranking and timing update
-
-- Adds a dedicated UCI Rankings page with rolling 52-week and current-calendar-year tables.
-- Uses result-class point scales: Tour GC 1,300; Giro/Vuelta GC 1,100; Monuments 800; Tour stages 210, with points also awarded down the classification.
-- Team rankings total the best 20 rider scores.
-- Compresses simulated stage-race gaps into modern plausible ranges so a routine runner-up is not tens of minutes behind.
-- Existing v0.4 saves rebuild their point ledger from archived editions on first load.
-
-
-## v0.7 market and team-building model
-
-- Rider movement is driven by contracts, salary versus market value, happiness, team results, facilities, team tier, director quality and sponsor-backed budget.
-- Elite unhappy or underpaid riders can be poached before their contracts expire.
-- High-budget teams that miss expectations become more aggressive in the following preseason.
-- Directors are reviewed at the start of each season and can be fired, hired from agencies or poached from another team. Elite directors are actively pulled toward WorldTour projects rather than remaining indefinitely in Continental teams.
-- Training facilities decay gradually and ambitious teams invest to restore them. Facilities affect rider performance and payroll capacity.
-- The Market screen is redesigned for mobile and clearly separates headline elite transfers, director changes, professional moves and sponsor changes.
-
-## v0.8 profile and balance polish
-
-- Rider pages now use Overview, Current season and History tabs.
-- Rider overview identifies the generated career year and displays the annual development curve.
-- Current season lists every target and its result/status.
-- History summarizes wins by competition level before the exact annual archive.
-- Team and director pages now use the same three-tab navigation.
-- UCI rankings can be filtered by current tier.
-- Almanac seasons include Tour, Giro and Vuelta champions with clickable entities.
-- Simulation preserves the screen currently being viewed.
-- Grand Tour achievements carry substantially more Hall of Fame weight.
-- Exceptional riders receive more cross-specialty flexibility, while specialists retain an advantage.
-- WorldTour recruitment places a stronger premium on 90+ potential riders.
-
-
-## v0.9 balance update
-
-- Rider current-season plans are grouped chronologically by month.
-- Retirement targets now begin at 28, with most riders targeting ages 30–33 and elite riders sometimes lasting longer.
-- Grand Tour GC strongly rewards sustained ability, team support, recovery and Grand Tour suitability; low-rated riders can still win stages but are now extraordinarily unlikely to win the overall classification.
-- Grand Tour gaps are more competitive rather than clustering at the cap.
-- Classics repeat-win pressure limits implausible four-year totals while preserving elite specialist dynasties.
-- Generational riders receive a small number of cross-program targets so Merckx/Pogačar-style careers can emerge.
-- See `QA_BALANCE_v0.9.md` for deterministic test notes.
-
-
-## v1.0 final polish
-
-- Final deterministic narrative-balance pass for dynasties, rivals, interrupted peaks and elite-team recruitment.
-- Refined generational longevity and repeat-major experience without hard caps on Grand Tours or Monuments.
-- Complete typography, spacing, link-state, card, table and mobile consistency audit.
-- The visual system remains an old European cycling almanac: cream stock, burgundy ink, brass accents and editorial serif display type.
-- See `QA_BALANCE_v1.0.md` for the final fixed-seed benchmark.
+Have a good season.

@@ -1,0 +1,842 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background-color: #efe2c8;
+  color: #1a1814;
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.5;
+  background-image:
+    radial-gradient(circle at 14% 12%, rgba(168, 38, 31, 0.09) 0%, transparent 22%),
+    radial-gradient(circle at 88% 18%, rgba(124, 86, 39, 0.07) 0%, transparent 20%),
+    radial-gradient(circle at 24% 86%, rgba(56, 44, 26, 0.06) 0%, transparent 18%),
+    linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 35%, rgba(0,0,0,0.025) 100%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 0 0.08 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.15;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 44px,
+      rgba(30, 24, 17, 0.03) 45px,
+      transparent 46px,
+      transparent 92px
+    ),
+    linear-gradient(90deg, rgba(53, 39, 23, 0.045) 0%, transparent 8%, transparent 92%, rgba(53, 39, 23, 0.05) 100%);
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 55%, rgba(33, 23, 13, 0.08) 100%);
+  opacity: 0.55;
+}
+
+/* numerical/tabular alignment for results */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* hand-drawn rule */
+.rule {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(26, 24, 20, 0.8) 15%, rgba(26, 24, 20, 0.8) 85%, transparent);
+  opacity: 0.6;
+}
+
+.rule-thick {
+  height: 3px;
+  background: #1a1814;
+  position: relative;
+}
+.rule-thick::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #1a1814;
+}
+
+/* vintage button */
+.btn-vintage {
+  font-family: 'Special Elite', Georgia, serif;
+  letter-spacing: 0.08em;
+  background: linear-gradient(180deg, #221c16 0%, #17120f 100%);
+  color: #f4ead5;
+  padding: 0.7rem 1.4rem;
+  border: 1px solid rgba(26, 24, 20, 0.95);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 2px 2px 0 rgba(26,24,20,0.16);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-block;
+  text-transform: uppercase;
+}
+.btn-vintage:hover {
+  background: linear-gradient(180deg, #a8261f 0%, #7a1a14 100%);
+  border-color: #7a1a14;
+  transform: translateY(-1px);
+}
+.btn-vintage:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-vintage.outline {
+  background: rgba(255, 252, 240, 0.65);
+  color: #1a1814;
+}
+.btn-vintage.outline:hover {
+  background: #1a1814;
+  color: #f4ead5;
+}
+
+/* card on paper */
+.card-paper {
+  background:
+    linear-gradient(180deg, rgba(255, 251, 242, 0.92) 0%, rgba(250, 242, 224, 0.88) 100%),
+    repeating-linear-gradient(0deg, rgba(50,40,30,0.02) 0 2px, transparent 2px 4px);
+  border: 1px solid rgba(56, 47, 36, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.42),
+    inset 0 -18px 32px rgba(114, 86, 52, 0.03),
+    0 1px 0 rgba(26, 24, 20, 0.05),
+    5px 5px 0 rgba(43, 34, 26, 0.05);
+  position: relative;
+}
+
+.card-paper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,0.20) 0%, transparent 18%, transparent 82%, rgba(82,63,40,0.04) 100%);
+  mix-blend-mode: multiply;
+}
+
+.masthead-paper {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(26, 24, 20, 0.25);
+  background:
+    linear-gradient(180deg, rgba(250,245,232,0.98) 0%, rgba(240,229,204,0.96) 100%),
+    repeating-linear-gradient(0deg, rgba(26,24,20,0.03) 0 1px, transparent 1px 3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -40px 40px rgba(128, 91, 41, 0.04),
+    0 1px 0 rgba(26,24,20,0.06),
+    6px 6px 0 rgba(26,24,20,0.05);
+}
+
+.masthead-paper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 24%, rgba(168, 38, 31, 0.09) 0%, transparent 18%),
+    radial-gradient(circle at 82% 20%, rgba(116, 82, 39, 0.06) 0%, transparent 22%),
+    linear-gradient(90deg, transparent 0%, rgba(26,24,20,0.035) 48%, transparent 52%, transparent 100%);
+}
+
+/* jersey badges */
+.jersey-yellow { background: #e8c547; color: #1a1814; }
+.jersey-green { background: #3d6b3a; color: #fafafa; }
+.jersey-polka { background: #fafafa; color: #b03b4d; border: 1px solid #b03b4d; }
+.jersey-white { background: #fafafa; color: #1a1814; border: 1px solid #1a1814; }
+
+/* rarity colors (subdued for paper aesthetic) */
+.rarity-generational { color: #7b1fa2; font-weight: 800; text-shadow: 0 0 10px rgba(123,31,162,.18); }
+.rarity-legend { color: #a8261f; font-weight: 700; }
+.rarity-epic { color: #7a4a1a; font-weight: 600; }
+.rarity-rare { color: #2a4a6b; font-weight: 500; }
+.rarity-uncommon { color: #3d6b3a; }
+.rarity-common { color: #5a5248; }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fade-in 0.3s ease forwards; }
+
+@keyframes stamp-in {
+  0% { opacity: 0; transform: scale(1.4) rotate(-3deg); }
+  60% { opacity: 1; transform: scale(0.95) rotate(-1deg); }
+  100% { opacity: 1; transform: scale(1) rotate(-1deg); }
+}
+.animate-stamp { animation: stamp-in 0.4s ease forwards; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #e8dcc0; }
+::-webkit-scrollbar-thumb { background: #1a1814; }
+
+/* Flag rendering — Noto Color Emoji as primary so Chrome/Windows
+   shows proper flags instead of region letter fallback. */
+.flag {
+  font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+  font-style: normal;
+  line-height: 1;
+  display: inline-block;
+}
+
+/* Stage-by-stage GC chart */
+.gc-chart-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.gc-chart-axis {
+  stroke: rgba(26, 24, 20, 0.3);
+  stroke-width: 1;
+}
+.gc-chart-grid {
+  stroke: rgba(26, 24, 20, 0.08);
+  stroke-width: 1;
+}
+.gc-chart-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  fill: rgba(26, 24, 20, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   Almanac shell and navigation
+   -------------------------------------------------------------------------- */
+.almanac-shell-header {
+  position: relative;
+  z-index: 20;
+  border-bottom: 1px solid rgba(26, 24, 20, 0.24);
+  background: linear-gradient(180deg, rgba(239, 226, 200, 0.94), rgba(232, 216, 184, 0.88));
+  backdrop-filter: blur(8px);
+}
+
+.almanac-masthead {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(26, 24, 20, 0.33);
+  background:
+    linear-gradient(180deg, rgba(255, 252, 243, 0.96), rgba(245, 235, 213, 0.95)),
+    repeating-linear-gradient(0deg, rgba(26, 24, 20, 0.025) 0 1px, transparent 1px 3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.66),
+    inset 0 -28px 54px rgba(92, 63, 34, 0.045),
+    6px 6px 0 rgba(39, 29, 19, 0.055);
+}
+
+.almanac-masthead::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background:
+    radial-gradient(circle at 10% 22%, rgba(168, 38, 31, 0.08), transparent 17%),
+    radial-gradient(circle at 86% 16%, rgba(102, 70, 34, 0.07), transparent 20%),
+    linear-gradient(90deg, transparent 0%, rgba(26,24,20,0.025) 49%, transparent 51%);
+}
+
+.almanac-masthead > * {
+  position: relative;
+  z-index: 1;
+}
+
+.almanac-masthead__edition {
+  min-height: 28px;
+  padding: 7px 16px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  border-bottom: 1px solid rgba(26, 24, 20, 0.55);
+  font-family: 'Special Elite', Georgia, serif;
+  font-size: 9px;
+  line-height: 1.2;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+  color: rgba(26, 24, 20, 0.74);
+}
+
+.almanac-masthead__main {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 17px 20px 14px;
+  border-bottom: 3px double rgba(26, 24, 20, 0.82);
+}
+
+.almanac-masthead__stamp {
+  flex: 0 0 auto;
+  min-width: 112px;
+  padding: 10px 12px 9px;
+  border: 1px solid rgba(122, 26, 20, 0.62);
+  outline: 1px solid rgba(122, 26, 20, 0.18);
+  outline-offset: -4px;
+  color: #7a1a14;
+  text-align: center;
+  transform: rotate(-1deg);
+  background: rgba(168, 38, 31, 0.025);
+}
+
+.almanac-text-link {
+  font-family: 'Special Elite', Georgia, serif;
+  font-size: 10px;
+  line-height: 1;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  color: rgba(26, 24, 20, 0.64);
+}
+
+.almanac-text-link:hover {
+  color: #a8261f;
+}
+
+.almanac-status-strip {
+  min-height: 40px;
+  padding: 8px 14px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(95px, 170px) auto;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(26, 24, 20, 0.24);
+  background: rgba(229, 211, 175, 0.42);
+}
+
+.almanac-status-strip__label {
+  font-family: 'Special Elite', Georgia, serif;
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  color: #7a1a14;
+  white-space: nowrap;
+}
+
+.almanac-status-strip__story {
+  min-width: 0;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 11px;
+}
+
+.almanac-status-strip__progress {
+  height: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(26, 24, 20, 0.32);
+  background: rgba(255, 252, 242, 0.72);
+}
+
+.almanac-status-strip__progress > span {
+  display: block;
+  height: 100%;
+  background: repeating-linear-gradient(135deg, #a8261f 0 5px, #7a1a14 5px 10px);
+}
+
+.almanac-contents-label {
+  padding: 8px 14px 6px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: 'Special Elite', Georgia, serif;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: rgba(26, 24, 20, 0.58);
+}
+
+.almanac-nav {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-top: 1px solid rgba(26, 24, 20, 0.72);
+}
+
+.almanac-nav__item {
+  position: relative;
+  min-height: 52px;
+  padding: 9px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  border-right: 1px solid rgba(26, 24, 20, 0.22);
+  text-align: left;
+  background: rgba(255, 252, 242, 0.25);
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.almanac-nav__item:last-child {
+  border-right: 0;
+}
+
+.almanac-nav__item:hover:not(.is-disabled) {
+  background: rgba(232, 213, 177, 0.62);
+}
+
+.almanac-nav__item.is-active {
+  color: #7a1a14;
+  background: rgba(168, 38, 31, 0.055);
+  box-shadow: inset 0 -4px 0 #a8261f;
+}
+
+.almanac-nav__item.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.34;
+}
+
+.almanac-nav__number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  opacity: 0.52;
+}
+
+.almanac-nav__label {
+  font-family: 'Special Elite', Georgia, serif;
+  font-size: 10px;
+  line-height: 1.15;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.almanac-nav__live {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 2px 4px 1px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px;
+  line-height: 1;
+  color: #f4ead5;
+  background: #a8261f;
+}
+
+/* Page folios */
+.almanac-page-header {
+  padding-top: 4px;
+  border-top: 1px solid rgba(26, 24, 20, 0.72);
+  border-bottom: 3px double rgba(26, 24, 20, 0.76);
+}
+
+.almanac-page-header__topline {
+  min-height: 26px;
+  padding: 5px 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Special Elite', Georgia, serif;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(26, 24, 20, 0.58);
+}
+
+.almanac-page-header__dots {
+  flex: 1;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, rgba(26,24,20,0.35) 0 2px, transparent 2px 5px);
+}
+
+.almanac-page-header__body {
+  padding: 13px 0 15px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.almanac-page-header__aside {
+  flex: 0 0 auto;
+  min-width: 140px;
+  text-align: right;
+}
+
+/* Calendar annual */
+.calendar-feature {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(220px, 0.65fr);
+  border: 1px solid rgba(26, 24, 20, 0.3);
+  background:
+    linear-gradient(135deg, rgba(255,252,242,0.96), rgba(239,225,196,0.93)),
+    repeating-linear-gradient(0deg, rgba(26,24,20,0.025) 0 1px, transparent 1px 3px);
+  box-shadow: 5px 5px 0 rgba(26,24,20,0.05);
+}
+
+.calendar-feature::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 78% 10%, rgba(168,38,31,0.09), transparent 26%),
+    linear-gradient(90deg, transparent 0 66%, rgba(26,24,20,0.035) 66% 66.2%, transparent 66.2%);
+}
+
+.calendar-feature__main,
+.calendar-feature__aside {
+  position: relative;
+  z-index: 1;
+  padding: 22px;
+}
+
+.calendar-feature__aside {
+  border-left: 1px solid rgba(26, 24, 20, 0.2);
+  background: rgba(228, 209, 171, 0.31);
+}
+
+.calendar-index-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 11px 0;
+  border-top: 1px solid rgba(26, 24, 20, 0.24);
+  border-bottom: 1px solid rgba(26, 24, 20, 0.24);
+}
+
+.calendar-filter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.calendar-filter-button {
+  padding: 6px 10px 5px;
+  border: 1px solid rgba(26, 24, 20, 0.27);
+  font-family: 'Special Elite', Georgia, serif;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: rgba(255,252,242,0.42);
+}
+
+.calendar-filter-button:hover {
+  border-color: rgba(26, 24, 20, 0.64);
+}
+
+.calendar-filter-button.is-active {
+  color: #f4ead5;
+  border-color: #7a1a14;
+  background: #7a1a14;
+}
+
+.calendar-month {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  border-top: 1px solid rgba(26, 24, 20, 0.48);
+}
+
+.calendar-month:last-child {
+  border-bottom: 1px solid rgba(26, 24, 20, 0.48);
+}
+
+.calendar-month__folio {
+  padding: 17px 12px 14px 0;
+  border-right: 1px solid rgba(26, 24, 20, 0.2);
+}
+
+.calendar-month__number {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 46px;
+  line-height: 0.9;
+  font-weight: 700;
+  color: rgba(122, 26, 20, 0.88);
+}
+
+.calendar-month__name {
+  margin-top: 8px;
+  font-family: 'Special Elite', Georgia, serif;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.calendar-month__races {
+  min-width: 0;
+}
+
+.calendar-race-row {
+  position: relative;
+  min-height: 86px;
+  padding: 13px 13px 12px 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(140px, 0.42fr);
+  align-items: center;
+  gap: 20px;
+  border-bottom: 1px solid rgba(26, 24, 20, 0.13);
+  background: rgba(255, 252, 242, 0.19);
+}
+
+.calendar-race-row:last-child {
+  border-bottom: 0;
+}
+
+.calendar-race-row:hover {
+  background: rgba(232, 215, 181, 0.35);
+}
+
+.calendar-race-row.is-current {
+  background: rgba(168, 38, 31, 0.055);
+  box-shadow: inset 5px 0 0 #a8261f;
+}
+
+.calendar-race-row.is-complete {
+  background: rgba(229, 217, 194, 0.29);
+}
+
+.calendar-race-row__index {
+  position: absolute;
+  top: 12px;
+  left: 7px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  opacity: 0.4;
+}
+
+.calendar-race-row__title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.calendar-race-row__meta {
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px 8px;
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 11px;
+  color: rgba(26, 24, 20, 0.63);
+}
+
+.calendar-race-row__result {
+  text-align: right;
+}
+
+.calendar-category-mark {
+  display: inline-block;
+  padding: 3px 6px 2px;
+  font-family: 'Special Elite', Georgia, serif;
+  font-size: 8px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid rgba(26, 24, 20, 0.28);
+}
+
+.calendar-category-mark--grand-tour {
+  color: #f4ead5;
+  border-color: #7a1a14;
+  background: #7a1a14;
+}
+
+.calendar-category-mark--monument {
+  color: #f4ead5;
+  border-color: #1a1814;
+  background: #1a1814;
+}
+
+.calendar-category-mark--week-stage {
+  color: #1a1814;
+  border-color: #b18a13;
+  background: #e8c547;
+}
+
+.calendar-category-mark--classic {
+  background: rgba(239, 226, 200, 0.75);
+}
+
+.calendar-current-tag {
+  display: inline-block;
+  padding: 3px 7px 2px;
+  font-family: 'Special Elite', Georgia, serif;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: #f4ead5;
+  background: #a8261f;
+}
+
+.calendar-winner-line {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.calendar-winner-line strong {
+  color: #7a1a14;
+}
+
+.calendar-podium-mini {
+  margin-top: 5px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: rgba(26, 24, 20, 0.58);
+}
+
+@media (max-width: 820px) {
+  .almanac-masthead__main {
+    align-items: center;
+    padding: 15px 16px 13px;
+  }
+
+  .almanac-masthead__stamp {
+    min-width: 96px;
+  }
+
+  .almanac-status-strip {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .almanac-status-strip__progress {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .almanac-contents-label {
+    display: none;
+  }
+
+  .almanac-nav {
+    display: flex;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+  }
+
+  .almanac-nav__item {
+    flex: 0 0 132px;
+    min-height: 50px;
+  }
+
+  .calendar-feature {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-feature__aside {
+    border-top: 1px solid rgba(26,24,20,0.2);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .almanac-masthead__edition {
+    padding-inline: 10px;
+    font-size: 8px;
+  }
+
+  .almanac-masthead__main {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .almanac-masthead__stamp {
+    min-width: 78px;
+    padding: 8px 7px 7px;
+  }
+
+  .almanac-status-strip {
+    padding-inline: 10px;
+  }
+
+  .almanac-status-strip__story {
+    font-size: 10px;
+  }
+
+  .almanac-page-header__body {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .almanac-page-header__aside {
+    min-width: 0;
+    width: 100%;
+    text-align: left;
+  }
+
+  .calendar-feature__main,
+  .calendar-feature__aside {
+    padding: 17px;
+  }
+
+  .calendar-month {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-month__folio {
+    padding: 12px 0 8px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(26,24,20,0.18);
+  }
+
+  .calendar-month__number {
+    font-size: 33px;
+  }
+
+  .calendar-month__name {
+    margin-top: 0;
+  }
+
+  .calendar-race-row {
+    min-height: 0;
+    padding: 15px 10px 14px 16px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .calendar-race-row__title {
+    font-size: 22px;
+  }
+
+  .calendar-race-row__result {
+    padding-top: 9px;
+    border-top: 1px dotted rgba(26,24,20,0.25);
+    text-align: left;
+  }
+
+  .calendar-podium-mini {
+    justify-content: flex-start;
+  }
+}
