@@ -1,7 +1,24 @@
-# Peloton Chronicle v1.4.2
+# Peloton Chronicle v1.5
 
 A Vite + React modern-era professional road-cycling world simulation. The universe advances by calendar weeks while riders, directors, team organizations, sponsors, race editions and completed seasons remain searchable in a permanent historical archive.
 
+
+
+## v1.5 calendar, condition and classification model
+
+- **Visible condition:** Race shape, fatigue, recent 28-day workload and mandatory recovery are shown on rider profiles.
+- **Protected calendars:** planned and actual starts cannot overlap; elite riders use smaller programmes with recovery buffers, and a Grand Tour requires a clean preparation window.
+- **Real fatigue:** race load is added by duration, terrain and Recovery skill. Week-long races require recovery and Grand Tours impose mandatory rest.
+- **Race shape:** sensible racing builds sharpness, while one or two inactive months progressively remove it. Freshness without preparation is no longer an advantage.
+- **Specialist scaling:** specialists retain 100% of the annual ceiling in core skills and 90% in secondary skills. All-rounders receive 95% across every skill as the price of versatility.
+- **Distinct jerseys:** points favors sprint attributes and flat placings; mountains favors climbing attributes and mountain placings. A double is restricted to an exceptional Generational all-rounder.
+- **Youth rule:** the young-rider classification is limited to age 23 or younger.
+- **Grand Tour protection:** stage upsets remain possible, but Rare and lower riders have a severe three-week GC consistency disadvantage.
+- **Team award:** the best-three-rider team classification is stored for the team, director and every selected rider on the winning team.
+- **Clear license movement:** Market marks promotions with an up arrow and relegations with a down arrow.
+- **CI reliability:** the focused and five-season test suites run as separate GitHub Actions steps.
+
+The detailed rules are in `CONDITION_MODEL_v1.5.md`. Ten-seed deterministic results are in `QA_CONDITION_BALANCE_v1.5.md`.
 
 ## v1.4.2 official-result consistency and newsprint presentation
 
@@ -20,16 +37,16 @@ The consistency regression deliberately removes the Giro from its winner's plann
 
 - **Rarity fixes base talent:** Generational 95–100, Legend 90–95, Epic 85–90, Rare 80–85, Uncommon 70–80 and Common 50–69.
 - **Base skill never changes:** the value assigned at spawn remains fixed through retirement.
-- **Annual rating is mathematical:** `round(base skill × annual multiplier)`, where the multiplier combines the career curve and deterministic yearly shape and is capped between 0.70 and 1.02.
+- **Season ceiling is mathematical:** `base skill × annual multiplier`, where the multiplier combines the career curve and deterministic yearly shape and is capped between 0.70 and 1.02. The displayed current rating is the average after specialty scaling.
 - **Nine visible skills:** speed, acceleration, power, climbing, endurance, recovery, bike control, strategy and mental strength.
-- **Specialization redistributes talent:** a climber and sprinter with the same base and annual multiplier have the same average rating, but different skill shapes.
+- **Specialization scales talent:** specialists preserve 100% of the season ceiling in core skills and 90% in secondary skills; all-rounders receive 95% across all nine skills.
 - **Stage results use skill blends:** mountain, flat, hilly, puncheur, time-trial and cobbled stages each weight the relevant skills differently.
 - **Race preference remains separate:** Grand Tour, one-week, Monument and stage-hunter preferences affect preparation and race suitability, not the underlying skill average.
 - **Condition is contextual:** form, fatigue, targeting, team support, facilities and director quality affect race-day performance without changing the displayed annual rating.
 - **Rider overview expanded:** full skill grid, fixed base skill, exact annual factor and current average are now visible.
 - **Existing saves upgrade:** old base values are proportionally mapped into the new rarity bands and receive deterministic skills without losing history.
 
-The full formula and stage weight table are documented in `SKILL_MODEL_v1.3.md`. Fixed-seed validation is in `QA_SKILLS_v1.3.md`.
+The original skill foundation is documented in `SKILL_MODEL_v1.3.md`; the final specialist scaling and condition rules are in `CONDITION_MODEL_v1.5.md`.
 
 ## v1.2 Director's Cut visual release
 
@@ -109,7 +126,7 @@ Run `npm run build`, then upload the contents of `dist/` to the web root.
 
 ## Save architecture
 
-Peloton Chronicle v1.3 does **not** require Neon or another backend. Universes are stored in IndexedDB, with three save drawers and JSON export. Saves remain local to the browser and device. Clearing browser site data deletes local universes, so use **Save & Settings → Export JSON** for external backups.
+Peloton Chronicle v1.5 does **not** require Neon or another backend. Universes are stored in IndexedDB, with three save drawers and JSON export. Saves remain local to the browser and device. Clearing browser site data deletes local universes, so use **Save & Settings → Export JSON** for external backups.
 
 Existing older universes are upgraded when opened. A new universe is still recommended when testing generation or balance changes because an old save preserves its existing population and prior results.
 

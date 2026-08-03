@@ -692,3 +692,9 @@ p,.story p,.page-head p,.profile-hero p,.muted{font-family:var(--body-copy)}
   .table-wrap table{font-size:.82rem}.table-wrap td{font-size:.8rem}
   .career-season-summary{grid-template-columns:1fr}
 }
+
+/* v1.5 condition and licence clarity */
+.condition-ribbon{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);background:rgba(255,250,233,.74);margin:0 0 18px;box-shadow:inset 0 1px rgba(255,255,255,.7)}
+.condition-ribbon>div{padding:14px 16px;border-right:1px solid var(--line);display:grid;gap:2px}.condition-ribbon>div:last-child{border-right:0}.condition-ribbon span{text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;color:var(--muted);font-weight:800}.condition-ribbon strong{font-family:Georgia,'Times New Roman',serif;font-size:1.65rem;color:var(--wine)}.condition-ribbon small{color:var(--muted)}.condition-ribbon .warning{background:rgba(126,44,41,.09)}.condition-ribbon .warning strong{color:#8b211f}.condition-warning{border-color:#9a4b46!important;background:rgba(126,44,41,.08)!important}.condition-warning strong{color:#8b211f!important}
+.licence-change{position:relative;padding-right:120px}.licence-direction{position:absolute;right:12px;top:12px;padding:6px 9px;border:1px solid currentColor;font-size:.68rem;font-weight:900;letter-spacing:.09em}.licence-direction.up{color:#315f3b;background:#e5efdf}.licence-direction.down{color:#8b2c2b;background:#f2dfd9}.licence-change.up{border-left:5px solid #47774e}.licence-change.down{border-left:5px solid #8b2c2b}
+@media(max-width:760px){.condition-ribbon{grid-template-columns:repeat(2,minmax(0,1fr))}.condition-ribbon>div:nth-child(2){border-right:0}.condition-ribbon>div:nth-child(-n+2){border-bottom:1px solid var(--line)}.licence-change{padding-right:14px}.licence-direction{position:static;display:inline-flex;width:max-content;margin-top:8px}}

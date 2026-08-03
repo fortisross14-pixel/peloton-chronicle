@@ -1,7 +1,7 @@
 {
   "name": "peloton-chronicle",
   "private": true,
-  "version": "1.4.2",
+  "version": "1.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,8 @@
     "test": "node --test tests/engine.test.js",
     "build:fallback": "node scripts/build.mjs",
     "test:skills": "node scripts/qa-skills-v13.mjs",
-    "test:balance": "node scripts/qa-race-balance-v14.mjs"
+    "test:balance": "node scripts/qa-race-balance-v15.mjs",
+    "test:long": "node --test tests/long.test.js"
   },
   "dependencies": {
     "react": "^19.1.0",

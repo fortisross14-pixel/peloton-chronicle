@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildRiderSkills, createUniverse, currentAbility, ELITE_TARGETS, facilityUpgradeCost, hallScore, openNextSeason, simulateNextEvent, simulateSeason, simulateWeeks, stageSkillRating, uciRankings, upgradeUniverse } from '../src/engine.js';
+import { buildRiderSkills, createUniverse, currentAbility, dayOfYear, ELITE_TARGETS, facilityUpgradeCost, hallScore, openNextSeason, simulateNextEvent, simulateSeason, simulateWeeks, SPECIALTY_CORE_SKILLS, stageSkillRating, uciRankings, upgradeUniverse } from '../src/engine.js';
 import { RARITIES } from '../src/data.js';
 import { renderDirectorPageForTest, renderFilteredResultsForTest, renderPageForTest, renderRiderPageForTest, renderRidersForTest, renderTeamPageForTest, renderTeamsForTest } from '../src/app.js';
 
@@ -114,46 +114,6 @@ test('opening the next season archives the completed year and resets the calenda
   assert.equal(state.eventIndex, 0);
 });
 
-test('keeps a five-season chronicle structurally valid', () => {
-  const state = createUniverse({ seed: 314159 });
-  const openingBaseSkills = new Map(state.riders.map(rider => [rider.id, rider.baseSkill]));
-  for (let year = 0; year < 5; year += 1) {
-    simulateSeason(state);
-    openNextSeason(state);
-  }
-  const active = state.riders.filter(rider => !rider.retired);
-  const rosterIds = state.teams.filter(team => team.status === 'active').flatMap(team => team.roster);
-  assert.equal(state.year, 2031);
-  assert.equal(state.archives.length, 5);
-  assert.equal(state.teams.filter(team => team.status === 'active' && team.tier === 'worldtour').length, 18);
-  assert.equal(state.teams.filter(team => team.status === 'active' && team.tier === 'proseries').length, 16);
-  assert.equal(new Set(rosterIds).size, rosterIds.length);
-  assert.equal(active.length, rosterIds.length);
-  assert.equal(active.filter(rider => rider.tier === 'u23' && rider.age > 22).length, 0);
-  for (const [id, baseSkill] of openingBaseSkills) assert.equal(state.riders.find(rider => rider.id === id)?.baseSkill, baseSkill);
-  for (const [rarity, target] of Object.entries(ELITE_TARGETS)) assert.equal(active.filter(rider => rider.rarity === rarity).length, target);
-  assert.equal(active.filter(rider => rider.potential >= 90 && rider.age >= 23 && rider.tier !== 'worldtour').length, 0);
-  for (const team of state.teams.filter(team => team.status === 'active')) {
-    assert.ok(team.primarySponsor?.name && team.secondarySponsor?.name);
-    assert.ok(team.facilities >= 1 && team.facilities <= 10);
-  }
-  const yearsByDirector = new Map();
-  for (const move of [...state.directorMoves].reverse()) {
-    const years = yearsByDirector.get(move.directorId) || [];
-    years.push(move.year);
-    yearsByDirector.set(move.directorId, years);
-  }
-  for (const years of yearsByDirector.values()) for (let index = 1; index < years.length; index += 1) assert.ok(years[index] - years[index - 1] >= 2);
-  assert.ok(state.sponsorLog.length > 0);
-  assert.ok(state.tierChanges.length > 0);
-  for (let year = 2027; year <= 2031; year += 1) {
-    const eliteMoves = state.transfers.filter(move => move.year === year && ['generational', 'legend', 'epic'].includes(move.rarity));
-    assert.ok(eliteMoves.length <= 6, `elite market should remain selective in ${year}`);
-    assert.equal(eliteMoves.filter(move => move.fromTier === 'worldtour' && move.toTier !== 'worldtour').length, 0);
-  }
-  assert.ok(JSON.stringify(state).length < 16_000_000);
-});
-
 test('Hall of Fame weighting places Tour plus Giro above five Monuments', () => {
   const base = createUniverse({ seed: 8080 }).riders[0];
   const grandTourRider = structuredClone(base);
@@ -257,7 +217,7 @@ test('rider and team filters and expanded economy cards render correctly', () =>
 });
 
 
-test('rarity fixes permanent base skill and annual skills average to base times multiplier', () => {
+test('rarity fixes permanent base skill while specialty scales the annual skill groups', () => {
   const state = createUniverse({ seed: 131313 });
   for (const rider of state.riders.filter(item => !item.retired)) {
     const range = RARITIES[rider.rarity];
@@ -267,20 +227,29 @@ test('rarity fixes permanent base skill and annual skills average to base times 
     assert.equal(values.length, 9);
     const average = values.reduce((sum, value) => sum + value, 0) / values.length;
     assert.equal(average, currentAbility(rider));
-    assert.equal(average, Math.round(rider.baseSkill * rider.annualMultiplier));
+    const ceiling = Math.min(100, rider.baseSkill * rider.annualMultiplier);
+    if (rider.terrain === 'all-rounder') assert.ok(Math.abs(average - ceiling * .95) < .2);
+    else {
+      const core = SPECIALTY_CORE_SKILLS[rider.terrain];
+      const coreAverage = core.reduce((sum, key) => sum + rider.skills[key], 0) / core.length;
+      const secondary = Object.keys(rider.skills).filter(key => !core.includes(key));
+      const secondaryAverage = secondary.reduce((sum, key) => sum + rider.skills[key], 0) / secondary.length;
+      assert.ok(Math.abs(coreAverage - ceiling) < .3);
+      assert.ok(Math.abs(secondaryAverage - ceiling * .9) < .3);
+    }
   }
 });
 
-test('stage specialties redistribute the same average into relevant skills', () => {
+test('specialists preserve their ceiling in core skills while all-rounders pay for versatility', () => {
   const common = { id:'skill-model-test', baseSkill:90, potential:90, careerLength:12, debutYear:2019, debutAge:18, age:25, developmentProfile:'stable' };
   const climber = buildRiderSkills({ ...common, terrain:'climber' }, 2026);
   const sprinter = buildRiderSkills({ ...common, terrain:'sprinter' }, 2026);
   const timeTrialist = buildRiderSkills({ ...common, terrain:'time-trialist' }, 2026);
-  assert.equal(climber.annualRating, sprinter.annualRating);
-  assert.equal(sprinter.annualRating, timeTrialist.annualRating);
+  const allRounder = buildRiderSkills({ ...common, terrain:'all-rounder' }, 2026);
   assert.ok(climber.skills.climbing > sprinter.skills.climbing);
   assert.ok(sprinter.skills.speed > climber.skills.speed);
-  assert.ok(timeTrialist.skills.power > sprinter.skills.power);
+  assert.ok(timeTrialist.skills.power > sprinter.skills.climbing);
+  assert.ok(allRounder.annualRating < climber.seasonCeiling);
   assert.ok(stageSkillRating({ ...common, terrain:'climber', skills:climber.skills, annualRating:climber.annualRating }, 'mountain') > stageSkillRating({ ...common, terrain:'sprinter', skills:sprinter.skills, annualRating:sprinter.annualRating }, 'mountain'));
 });
 
@@ -311,7 +280,8 @@ test('v1.2 saves migrate deterministically into the new rarity bands', () => {
   assert.equal(rider.baseSkill, 90);
   assert.equal(rider.potential, 90);
   assert.equal(Object.keys(rider.skills).length, 9);
-  assert.equal(currentAbility(rider), Math.round(rider.baseSkill * rider.annualMultiplier));
+  assert.equal(currentAbility(rider), Object.values(rider.skills).reduce((sum, value) => sum + value, 0) / 9);
+  assert.ok(currentAbility(rider) < rider.baseSkill * rider.annualMultiplier);
 });
 
 test('rider overview exposes the fixed base, multiplier and individual skills', () => {
@@ -323,6 +293,8 @@ test('rider overview exposes the fixed base, multiplier and individual skills', 
   assert.match(page, /Current rating/);
   assert.match(page, /Rider skills/);
   assert.match(page, /Mental strength/);
+  assert.match(page, /Race shape/);
+  assert.match(page, /Fatigue/);
 });
 
 test('rider totals, season programme, annual record and UCI ledger share the official race results', () => {
@@ -357,4 +329,54 @@ test('rider totals, season programme, annual record and UCI ledger share the off
   const archived = rider.career.seasons.find(season => season.year === state.year);
   assert.ok(archived?.raceWinDetails?.some(win => win.eventId === 'giro'));
   assert.equal(archived.points, officialPoints);
+});
+
+
+test('calendar selection prevents overlaps and extreme short-term race loads', () => {
+  const state = createUniverse({ seed: 151515 });
+  simulateSeason(state);
+  for (const rider of state.riders.filter(item => !item.retired)) {
+    const starts = [...(rider.raceLoadLog || [])].sort((a, b) => a.start - b.start);
+    for (let index = 1; index < starts.length; index += 1) assert.ok(starts[index].start > starts[index - 1].end, `${rider.name} entered overlapping races`);
+    let maxRollingDays = 0;
+    for (let day = 1; day <= 366; day += 1) {
+      const rolling = starts.filter(row => row.end >= day - 27 && row.start <= day).reduce((sum, row) => sum + Math.max(0, Math.min(row.end, day) - Math.max(row.start, day - 27) + 1), 0);
+      maxRollingDays = Math.max(maxRollingDays, rolling);
+    }
+    assert.ok(maxRollingDays <= 21, `${rider.name} had ${maxRollingDays} race days in a rolling 28-day window`);
+    const elite = ['generational','legend','epic'].includes(rider.rarity);
+    if (elite) {
+      assert.ok(rider.currentSeason.starts <= 16, `${rider.name} had ${rider.currentSeason.starts} starts`);
+      assert.ok(rider.currentSeason.raceDays <= 75, `${rider.name} had ${rider.currentSeason.raceDays} race days`);
+    }
+  }
+});
+
+test('Grand Tour fatigue, jersey eligibility and youth age rules are enforced', () => {
+  const state = createUniverse({ seed: 161616 });
+  let giro;
+  while (!giro) {
+    const output = simulateNextEvent(state);
+    if (output.result?.eventId === 'giro') giro = output.result;
+  }
+  const winner = state.riders.find(rider => rider.id === giro.winnerId);
+  assert.ok(winner.fatigue >= 30);
+  assert.ok(winner.mandatoryRestUntil > dayOfYear(state.year, 5, 9) + 20);
+  const youth = state.riders.find(rider => rider.id === giro.jerseys.young);
+  assert.ok(youth.age <= 23);
+  assert.notEqual(giro.jerseys.points, giro.jerseys.mountains);
+  const counts = new Map();
+  for (const stage of giro.stages) counts.set(stage.winnerId, (counts.get(stage.winnerId) || 0) + 1);
+  assert.ok(Math.max(...counts.values()) <= 6);
+});
+
+test('market licence changes show immediate promotion and relegation indicators', () => {
+  const state = createUniverse({ seed: 171717 });
+  state.tierChanges = [
+    { year: state.year, teamId: state.teams[0].id, teamName: state.teams[0].name, identity: state.teams[0].identity, from: 'proseries', to: 'worldtour', reason: 'Promotion test' },
+    { year: state.year, teamId: state.teams[1].id, teamName: state.teams[1].name, identity: state.teams[1].identity, from: 'worldtour', to: 'proseries', reason: 'Relegation test' }
+  ];
+  const market = renderPageForTest(state, 'transfers');
+  assert.match(market, /↑ PROMOTED/);
+  assert.match(market, /↓ RELEGATED/);
 });

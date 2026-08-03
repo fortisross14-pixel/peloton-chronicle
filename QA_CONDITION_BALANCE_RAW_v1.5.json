@@ -1,0 +1,585 @@
+{
+  "generatedAt": "2026-08-03T05:35:30.854Z",
+  "modelVersion": "1.5.0",
+  "totals": {
+    "seeds": 10,
+    "grandTours": 30,
+    "samePointsMountains": 0,
+    "overAgeYoungWinners": 0,
+    "lowRarityGrandTourWinners": 0,
+    "mountainStages": 210,
+    "incompatibleMountainWinners": 2,
+    "flatStages": 210,
+    "incompatibleFlatWinners": 0,
+    "actualCalendarOverlaps": 0,
+    "ridersOver21DaysIn28": 0,
+    "maxStageWinsInGrandTour": 7,
+    "maxRolling28Days": 21,
+    "maxEliteStarts": 14,
+    "maxEliteRaceDays": 70,
+    "maxAnyStarts": 26,
+    "maxAnyRaceDays": 81
+  },
+  "seeds": [
+    {
+      "seed": 101,
+      "grandTours": [
+        {
+          "race": "Giro d’Italia",
+          "winner": "Jan Novák",
+          "winnerRarity": "legend",
+          "winnerProfile": "climber",
+          "winnerRating": 91,
+          "maxStagesByOneRider": 5,
+          "pointsWinner": "Filippo Costa",
+          "pointsProfile": "rouleur",
+          "mountainsWinner": "Daniel Rojas",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "Tour de France",
+          "winner": "Sander Vermeulen",
+          "winnerRarity": "epic",
+          "winnerProfile": "climber",
+          "winnerRating": 84,
+          "maxStagesByOneRider": 5,
+          "pointsWinner": "Filippo Costa",
+          "pointsProfile": "rouleur",
+          "mountainsWinner": "Sander Vermeulen",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "La Vuelta a España",
+          "winner": "Petr Kučera",
+          "winnerRarity": "legend",
+          "winnerProfile": "rouleur",
+          "winnerRating": 87,
+          "maxStagesByOneRider": 4,
+          "pointsWinner": "Hugo Johansson",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Lukas Gruber",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        }
+      ],
+      "calendar": {
+        "overlaps": 0,
+        "ridersOver21DaysInRolling28": 0,
+        "maxRolling28Days": 21,
+        "maxEliteStarts": 14,
+        "maxEliteRaceDays": 66,
+        "maxAnyStarts": 25,
+        "maxAnyRaceDays": 81
+      }
+    },
+    {
+      "seed": 202,
+      "grandTours": [
+        {
+          "race": "Giro d’Italia",
+          "winner": "Mikkel Jensen",
+          "winnerRarity": "generational",
+          "winnerProfile": "cobbles",
+          "winnerRating": 92,
+          "maxStagesByOneRider": 5,
+          "pointsWinner": "Mikkel Jensen",
+          "pointsProfile": "cobbles",
+          "mountainsWinner": "Mikel Rodríguez",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "Tour de France",
+          "winner": "Mikkel Jensen",
+          "winnerRarity": "generational",
+          "winnerProfile": "cobbles",
+          "winnerRating": 92,
+          "maxStagesByOneRider": 5,
+          "pointsWinner": "Mikkel Jensen",
+          "pointsProfile": "cobbles",
+          "mountainsWinner": "Mikel Rodríguez",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 22,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "La Vuelta a España",
+          "winner": "Luca Romano",
+          "winnerRarity": "epic",
+          "winnerProfile": "climber",
+          "winnerRating": 80,
+          "maxStagesByOneRider": 4,
+          "pointsWinner": "Iker Fernández",
+          "pointsProfile": "rouleur",
+          "mountainsWinner": "Luca Romano",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        }
+      ],
+      "calendar": {
+        "overlaps": 0,
+        "ridersOver21DaysInRolling28": 0,
+        "maxRolling28Days": 21,
+        "maxEliteStarts": 14,
+        "maxEliteRaceDays": 67,
+        "maxAnyStarts": 25,
+        "maxAnyRaceDays": 79
+      }
+    },
+    {
+      "seed": 303,
+      "grandTours": [
+        {
+          "race": "Giro d’Italia",
+          "winner": "Maximilian Becker",
+          "winnerRarity": "legend",
+          "winnerProfile": "time-trialist",
+          "winnerRating": 88,
+          "maxStagesByOneRider": 4,
+          "pointsWinner": "Erik Karlsson",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Dylan Thomas",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "Tour de France",
+          "winner": "Michael Williams",
+          "winnerRarity": "generational",
+          "winnerProfile": "time-trialist",
+          "winnerRating": 89,
+          "maxStagesByOneRider": 4,
+          "pointsWinner": "Gábor Varga",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Robin Weber",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "La Vuelta a España",
+          "winner": "Maximilian Becker",
+          "winnerRarity": "legend",
+          "winnerProfile": "time-trialist",
+          "winnerRating": 88,
+          "maxStagesByOneRider": 4,
+          "pointsWinner": "Jan Krajnc",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Victor Dumont",
+          "mountainsProfile": "all-rounder",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        }
+      ],
+      "calendar": {
+        "overlaps": 0,
+        "ridersOver21DaysInRolling28": 0,
+        "maxRolling28Days": 21,
+        "maxEliteStarts": 14,
+        "maxEliteRaceDays": 68,
+        "maxAnyStarts": 24,
+        "maxAnyRaceDays": 74
+      }
+    },
+    {
+      "seed": 404,
+      "grandTours": [
+        {
+          "race": "Giro d’Italia",
+          "winner": "James Wright",
+          "winnerRarity": "legend",
+          "winnerProfile": "time-trialist",
+          "winnerRating": 86,
+          "maxStagesByOneRider": 4,
+          "pointsWinner": "Pierre Moreau",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Daniel Castro",
+          "mountainsProfile": "puncheur",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "Tour de France",
+          "winner": "Lennert De Clercq",
+          "winnerRarity": "epic",
+          "winnerProfile": "climber",
+          "winnerRating": 86,
+          "maxStagesByOneRider": 3,
+          "pointsWinner": "Rasmus Hansen",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Lennert De Clercq",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "La Vuelta a España",
+          "winner": "Eirik Olsen",
+          "winnerRarity": "legend",
+          "winnerProfile": "rouleur",
+          "winnerRating": 91,
+          "maxStagesByOneRider": 3,
+          "pointsWinner": "Eirik Olsen",
+          "pointsProfile": "rouleur",
+          "mountainsWinner": "Peter Tóth",
+          "mountainsProfile": "puncheur",
+          "youngWinnerAge": 22,
+          "pointsAndMountainsSame": false
+        }
+      ],
+      "calendar": {
+        "overlaps": 0,
+        "ridersOver21DaysInRolling28": 0,
+        "maxRolling28Days": 21,
+        "maxEliteStarts": 14,
+        "maxEliteRaceDays": 63,
+        "maxAnyStarts": 23,
+        "maxAnyRaceDays": 74
+      }
+    },
+    {
+      "seed": 505,
+      "grandTours": [
+        {
+          "race": "Giro d’Italia",
+          "winner": "James Brown",
+          "winnerRarity": "epic",
+          "winnerProfile": "all-rounder",
+          "winnerRating": 84,
+          "maxStagesByOneRider": 5,
+          "pointsWinner": "James Brown",
+          "pointsProfile": "all-rounder",
+          "mountainsWinner": "Michael Bouchard",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "Tour de France",
+          "winner": "Bram Bos",
+          "winnerRarity": "legend",
+          "winnerProfile": "climber",
+          "winnerRating": 88,
+          "maxStagesByOneRider": 4,
+          "pointsWinner": "Daan Meijer",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Bram Bos",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "La Vuelta a España",
+          "winner": "Arda Kaya",
+          "winnerRarity": "legend",
+          "winnerProfile": "time-trialist",
+          "winnerRating": 85,
+          "maxStagesByOneRider": 4,
+          "pointsWinner": "Diogo Ferreira",
+          "pointsProfile": "cobbles",
+          "mountainsWinner": "Anders Johansen",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 21,
+          "pointsAndMountainsSame": false
+        }
+      ],
+      "calendar": {
+        "overlaps": 0,
+        "ridersOver21DaysInRolling28": 0,
+        "maxRolling28Days": 21,
+        "maxEliteStarts": 14,
+        "maxEliteRaceDays": 59,
+        "maxAnyStarts": 26,
+        "maxAnyRaceDays": 81
+      }
+    },
+    {
+      "seed": 606,
+      "grandTours": [
+        {
+          "race": "Giro d’Italia",
+          "winner": "Ben Anderson",
+          "winnerRarity": "legend",
+          "winnerProfile": "cobbles",
+          "winnerRating": 92,
+          "maxStagesByOneRider": 4,
+          "pointsWinner": "Brandon Clark",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Ben Anderson",
+          "mountainsProfile": "cobbles",
+          "youngWinnerAge": 21,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "Tour de France",
+          "winner": "Jaka Mlakar",
+          "winnerRarity": "legend",
+          "winnerProfile": "all-rounder",
+          "winnerRating": 87,
+          "maxStagesByOneRider": 7,
+          "pointsWinner": "Rui Martins",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Jaka Mlakar",
+          "mountainsProfile": "all-rounder",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "La Vuelta a España",
+          "winner": "David Otieno",
+          "winnerRarity": "epic",
+          "winnerProfile": "climber",
+          "winnerRating": 82,
+          "maxStagesByOneRider": 3,
+          "pointsWinner": "Sam Martin",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Sergio Navarro",
+          "mountainsProfile": "puncheur",
+          "youngWinnerAge": 22,
+          "pointsAndMountainsSame": false
+        }
+      ],
+      "calendar": {
+        "overlaps": 0,
+        "ridersOver21DaysInRolling28": 0,
+        "maxRolling28Days": 21,
+        "maxEliteStarts": 14,
+        "maxEliteRaceDays": 68,
+        "maxAnyStarts": 25,
+        "maxAnyRaceDays": 76
+      }
+    },
+    {
+      "seed": 707,
+      "grandTours": [
+        {
+          "race": "Giro d’Italia",
+          "winner": "Oscar Thomas",
+          "winnerRarity": "epic",
+          "winnerProfile": "climber",
+          "winnerRating": 83,
+          "maxStagesByOneRider": 3,
+          "pointsWinner": "Marco Müller",
+          "pointsProfile": "cobbles",
+          "mountainsWinner": "Oscar Thomas",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "Tour de France",
+          "winner": "António Costa",
+          "winnerRarity": "generational",
+          "winnerProfile": "puncheur",
+          "winnerRating": 89,
+          "maxStagesByOneRider": 4,
+          "pointsWinner": "Lars Smit",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "António Costa",
+          "mountainsProfile": "puncheur",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "La Vuelta a España",
+          "winner": "Caleb Taylor",
+          "winnerRarity": "legend",
+          "winnerProfile": "all-rounder",
+          "winnerRating": 89,
+          "maxStagesByOneRider": 4,
+          "pointsWinner": "Arnaud Vandamme",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Caleb Taylor",
+          "mountainsProfile": "all-rounder",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        }
+      ],
+      "calendar": {
+        "overlaps": 0,
+        "ridersOver21DaysInRolling28": 0,
+        "maxRolling28Days": 21,
+        "maxEliteStarts": 14,
+        "maxEliteRaceDays": 66,
+        "maxAnyStarts": 23,
+        "maxAnyRaceDays": 79
+      }
+    },
+    {
+      "seed": 808,
+      "grandTours": [
+        {
+          "race": "Giro d’Italia",
+          "winner": "Anas El Amrani",
+          "winnerRarity": "epic",
+          "winnerProfile": "all-rounder",
+          "winnerRating": 84,
+          "maxStagesByOneRider": 4,
+          "pointsWinner": "Biniam Debesay",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Miguel Costa",
+          "mountainsProfile": "puncheur",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "Tour de France",
+          "winner": "Biniam Ghebremedhin",
+          "winnerRarity": "legend",
+          "winnerProfile": "time-trialist",
+          "winnerRating": 77,
+          "maxStagesByOneRider": 3,
+          "pointsWinner": "Victor Dumont",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Sander Willems",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "La Vuelta a España",
+          "winner": "Wout Vermeulen",
+          "winnerRarity": "generational",
+          "winnerProfile": "rouleur",
+          "winnerRating": 91,
+          "maxStagesByOneRider": 3,
+          "pointsWinner": "Nathan Bouchard",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Oscar Taylor",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        }
+      ],
+      "calendar": {
+        "overlaps": 0,
+        "ridersOver21DaysInRolling28": 0,
+        "maxRolling28Days": 21,
+        "maxEliteStarts": 14,
+        "maxEliteRaceDays": 66,
+        "maxAnyStarts": 24,
+        "maxAnyRaceDays": 75
+      }
+    },
+    {
+      "seed": 909,
+      "grandTours": [
+        {
+          "race": "Giro d’Italia",
+          "winner": "Marius Karlsen",
+          "winnerRarity": "epic",
+          "winnerProfile": "all-rounder",
+          "winnerRating": 86,
+          "maxStagesByOneRider": 3,
+          "pointsWinner": "Marius Karlsen",
+          "pointsProfile": "all-rounder",
+          "mountainsWinner": "Andrea Ferrari",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "Tour de France",
+          "winner": "Alexandru Stan",
+          "winnerRarity": "legend",
+          "winnerProfile": "time-trialist",
+          "winnerRating": 90,
+          "maxStagesByOneRider": 4,
+          "pointsWinner": "Jasper De Smet",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Kasper Madsen",
+          "mountainsProfile": "all-rounder",
+          "youngWinnerAge": 22,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "La Vuelta a España",
+          "winner": "Felix Fischer",
+          "winnerRarity": "legend",
+          "winnerProfile": "time-trialist",
+          "winnerRating": 89,
+          "maxStagesByOneRider": 5,
+          "pointsWinner": "Wout Vermeulen",
+          "pointsProfile": "cobbles",
+          "mountainsWinner": "Juan Rodríguez",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 21,
+          "pointsAndMountainsSame": false
+        }
+      ],
+      "calendar": {
+        "overlaps": 0,
+        "ridersOver21DaysInRolling28": 0,
+        "maxRolling28Days": 21,
+        "maxEliteStarts": 14,
+        "maxEliteRaceDays": 65,
+        "maxAnyStarts": 24,
+        "maxAnyRaceDays": 76
+      }
+    },
+    {
+      "seed": 1010,
+      "grandTours": [
+        {
+          "race": "Giro d’Italia",
+          "winner": "Diogo Ferreira",
+          "winnerRarity": "legend",
+          "winnerProfile": "time-trialist",
+          "winnerRating": 91,
+          "maxStagesByOneRider": 5,
+          "pointsWinner": "Marco Conti",
+          "pointsProfile": "rouleur",
+          "mountainsWinner": "Diogo Ferreira",
+          "mountainsProfile": "time-trialist",
+          "youngWinnerAge": 22,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "Tour de France",
+          "winner": "Romain Martin",
+          "winnerRarity": "generational",
+          "winnerProfile": "puncheur",
+          "winnerRating": 84,
+          "maxStagesByOneRider": 3,
+          "pointsWinner": "Oskar Andersson",
+          "pointsProfile": "sprinter",
+          "mountainsWinner": "Eero Mäkinen",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        },
+        {
+          "race": "La Vuelta a España",
+          "winner": "Davide Rossi",
+          "winnerRarity": "generational",
+          "winnerProfile": "climber",
+          "winnerRating": 92,
+          "maxStagesByOneRider": 5,
+          "pointsWinner": "Marco Conti",
+          "pointsProfile": "rouleur",
+          "mountainsWinner": "Davide Rossi",
+          "mountainsProfile": "climber",
+          "youngWinnerAge": 23,
+          "pointsAndMountainsSame": false
+        }
+      ],
+      "calendar": {
+        "overlaps": 0,
+        "ridersOver21DaysInRolling28": 0,
+        "maxRolling28Days": 21,
+        "maxEliteStarts": 14,
+        "maxEliteRaceDays": 70,
+        "maxAnyStarts": 26,
+        "maxAnyRaceDays": 77
+      }
+    }
+  ]
+}
