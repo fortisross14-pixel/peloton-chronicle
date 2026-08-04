@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildRiderSkills, createUniverse, currentAbility, dayOfYear, ELITE_TARGETS, facilityUpgradeCost, hallScore, openNextSeason, simulateNextEvent, simulateSeason, simulateWeeks, SPECIALTY_CORE_SKILLS, stageSkillRating, uciRankings, upgradeUniverse } from '../src/engine.js';
+import { buildRiderSkills, captureWeeklyRankingSnapshot, createUniverse, currentAbility, dayOfYear, ELITE_TARGETS, facilityUpgradeCost, hallScore, openNextSeason, riderRankingHistory, riderRecordBook, riderRivalries, simulateNextEvent, simulateSeason, simulateWeeks, SPECIALTY_CORE_SKILLS, stageSkillRating, uciRankings, upgradeUniverse } from '../src/engine.js';
 import { RARITIES } from '../src/data.js';
 import { renderDirectorPageForTest, renderFilteredResultsForTest, renderPageForTest, renderRiderPageForTest, renderRidersForTest, renderTeamPageForTest, renderTeamsForTest } from '../src/app.js';
 
@@ -379,4 +379,45 @@ test('market licence changes show immediate promotion and relegation indicators'
   const market = renderPageForTest(state, 'transfers');
   assert.match(market, /↑ PROMOTED/);
   assert.match(market, /↓ RELEGATED/);
+});
+
+
+test('weekly UCI snapshots preserve movement and compact ranking history', () => {
+  const state = createUniverse({ seed: 160001 });
+  simulateWeeks(state, 16);
+  assert.ok(state.weeklyRankings.length >= 10);
+  assert.ok(state.weeklyRankings.every(row => row.riders.length <= 100 && row.teams.length <= 30));
+  const latest = state.weeklyRankings.at(-1);
+  assert.ok(latest.week >= 16);
+  const leaderId = latest.riders[0]?.[0];
+  assert.ok(leaderId);
+  const history = riderRankingHistory(state, leaderId);
+  assert.ok(history.length >= 1);
+  const forced = captureWeeklyRankingSnapshot(state, state.currentDay, { force: true, silent: true });
+  assert.equal(forced.week, latest.week);
+});
+
+test('Chronicle parity pages expose prospects nations and expanded rider records', () => {
+  const state = createUniverse({ seed: 160002 });
+  simulateWeeks(state, 28);
+  const rider = state.riders.find(row => !row.retired && row.currentSeason.starts > 0) || state.riders[0];
+  assert.match(renderPageForTest(state, 'prospects'), /U23 Prospect Watch/);
+  assert.match(renderPageForTest(state, 'nations'), /National cycling cultures/);
+  assert.match(renderRiderPageForTest(state, rider.id, 'development'), /Development/);
+  assert.match(renderRiderPageForTest(state, rider.id, 'records'), /Peak world rank/);
+  assert.match(renderRiderPageForTest(state, rider.id, 'rivalries'), /Rivalries/);
+  const records = riderRecordBook(state, rider.id);
+  assert.ok('peakRank' in records);
+  assert.ok(Array.isArray(riderRivalries(state, rider.id)));
+});
+
+test('watchlists and ranking milestones are save-compatible Chronicle data', () => {
+  const state = createUniverse({ seed: 160003 });
+  assert.deepEqual(Object.keys(state.watchlist).sort(), ['countries','directors','races','riders','teams']);
+  simulateWeeks(state, 20);
+  assert.ok(Array.isArray(state.rankingMilestones));
+  assert.ok(Array.isArray(state.graduationClasses));
+  const upgraded = upgradeUniverse(structuredClone(state));
+  assert.equal(upgraded.version, 16);
+  assert.ok(upgraded.weeklyRankings.length > 0);
 });

@@ -96,6 +96,50 @@ export const COUNTRY_DATABASE = {
   KR:{weight:1,first:['Min-jun','Ji-hoon','Hyun-woo','Seo-jun','Dong-hyun','Joon'],last:['Kim','Lee','Park','Choi','Jung','Kang']}
 };
 
+
+export const COUNTRY_NAMES = {
+  BE:'Belgium',FR:'France',ES:'Spain',IT:'Italy',NL:'Netherlands',GB:'Great Britain',US:'United States',CO:'Colombia',DK:'Denmark',AU:'Australia',DE:'Germany',PT:'Portugal',CH:'Switzerland',NO:'Norway',SI:'Slovenia',PL:'Poland',CZ:'Czech Republic',AT:'Austria',HR:'Croatia',RO:'Romania',JP:'Japan',ZA:'South Africa',NZ:'New Zealand',CA:'Canada',IE:'Ireland',MX:'Mexico',EC:'Ecuador',ER:'Eritrea',RW:'Rwanda',MA:'Morocco',KE:'Kenya',KZ:'Kazakhstan',HU:'Hungary',SE:'Sweden',FI:'Finland',LU:'Luxembourg',SK:'Slovakia',LT:'Lithuania',EE:'Estonia',GR:'Greece',TR:'Türkiye',IL:'Israel',AR:'Argentina',BR:'Brazil',CL:'Chile',VE:'Venezuela',UY:'Uruguay',UA:'Ukraine',CN:'China',KR:'South Korea',AE:'United Arab Emirates',BH:'Bahrain'
+};
+
+// Cycling tradition affects elite-spawn probability without making the sport deterministic.
+// Terrain weights are cultural/development tendencies, not hard nationality restrictions.
+export const COUNTRY_CYCLING_PROFILES = {
+  BE:{tradition:1.45,elite:1.36,terrain:{cobbles:4,puncheur:2.5,rouleur:2,sprinter:1.5}},
+  FR:{tradition:1.35,elite:1.25,terrain:{'all-rounder':2,climber:1.8,puncheur:1.5,rouleur:1.3}},
+  ES:{tradition:1.34,elite:1.24,terrain:{climber:3,'all-rounder':2,puncheur:1.8,'time-trialist':1.1}},
+  IT:{tradition:1.38,elite:1.28,terrain:{'all-rounder':2.2,climber:2,puncheur:2,sprinter:1.5}},
+  NL:{tradition:1.28,elite:1.2,terrain:{rouleur:2.8,'time-trialist':2.3,cobbles:2,sprinter:1.4}},
+  GB:{tradition:1.12,elite:1.14,terrain:{'time-trialist':2.8,rouleur:2,'all-rounder':1.5}},
+  US:{tradition:.92,elite:.98,terrain:{'time-trialist':2,rouleur:1.7,'all-rounder':1.4}},
+  CO:{tradition:1.14,elite:1.18,terrain:{climber:4,'all-rounder':1.4,puncheur:1.2}},
+  DK:{tradition:1.17,elite:1.18,terrain:{rouleur:2.5,'time-trialist':2,cobbles:1.8,puncheur:1.5}},
+  AU:{tradition:1.05,elite:1.08,terrain:{rouleur:2,sprinter:1.8,'time-trialist':1.6,'all-rounder':1.3}},
+  DE:{tradition:1.08,elite:1.06,terrain:{'time-trialist':2.2,sprinter:2,rouleur:1.7}},
+  PT:{tradition:1.02,elite:1.02,terrain:{climber:2.4,'all-rounder':1.6,'time-trialist':1.3}},
+  CH:{tradition:1.04,elite:1.04,terrain:{'time-trialist':2.2,rouleur:1.8,'all-rounder':1.5}},
+  NO:{tradition:1.0,elite:1.02,terrain:{rouleur:2,sprinter:1.8,cobbles:1.4}},
+  SI:{tradition:1.08,elite:1.18,terrain:{'all-rounder':2.7,climber:2.2,'time-trialist':1.4}},
+  JP:{tradition:.78,elite:.78,terrain:{rouleur:1.6,'time-trialist':1.5,puncheur:1.2}},
+  ZA:{tradition:.78,elite:.8,terrain:{'all-rounder':1.6,rouleur:1.5,climber:1.3}},
+  NZ:{tradition:.88,elite:.92,terrain:{rouleur:2,'time-trialist':1.6,'all-rounder':1.4}},
+  CA:{tradition:.82,elite:.86,terrain:{rouleur:1.8,'time-trialist':1.7,'all-rounder':1.3}},
+  IE:{tradition:.9,elite:.9,terrain:{rouleur:1.8,puncheur:1.5,cobbles:1.4}},
+  MX:{tradition:.72,elite:.72,terrain:{climber:2,puncheur:1.4,'all-rounder':1.2}},
+  EC:{tradition:.92,elite:1.0,terrain:{climber:3.4,'all-rounder':1.3}},
+  ER:{tradition:.92,elite:.98,terrain:{climber:2.6,rouleur:1.7,endurance:1}},
+  RW:{tradition:.7,elite:.72,terrain:{climber:2.3,rouleur:1.3}},
+  MA:{tradition:.62,elite:.62,terrain:{climber:1.7,rouleur:1.4}},
+  KE:{tradition:.58,elite:.58,terrain:{climber:1.8,rouleur:1.3}},
+  KZ:{tradition:.88,elite:.88,terrain:{rouleur:2,'time-trialist':1.7,'all-rounder':1.3}},
+  LU:{tradition:1.0,elite:1.0,terrain:{'all-rounder':1.8,climber:1.5,puncheur:1.4}},
+  SK:{tradition:.9,elite:.92,terrain:{sprinter:1.8,puncheur:1.5,rouleur:1.3}},
+  AR:{tradition:.68,elite:.68,terrain:{rouleur:1.5,sprinter:1.4,'all-rounder':1.2}},
+  BR:{tradition:.62,elite:.6,terrain:{rouleur:1.5,sprinter:1.4}},
+  CN:{tradition:.58,elite:.58,terrain:{rouleur:1.5,'time-trialist':1.4}},
+  KR:{tradition:.55,elite:.55,terrain:{rouleur:1.4,sprinter:1.3}},
+  default:{tradition:.76,elite:.74,terrain:{'all-rounder':1.3,rouleur:1.2,puncheur:1.1,climber:1.1,sprinter:1.1,'time-trialist':1.1,cobbles:1}}
+};
+
 export const DEVELOPMENT_NATIONS = ['FR','IT','ES','BE','NL','GB','US','CO','DK','DE','AU','NO','PT','CH','SI','MX','EC','ER'];
 export const STAR_SEEDS = [];
 

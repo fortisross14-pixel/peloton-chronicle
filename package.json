@@ -1,17 +1,18 @@
 {
   "name": "peloton-chronicle",
   "private": true,
-  "version": "1.5.0",
+  "version": "1.6.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test tests/engine.test.js",
+    "test": "node --test --test-name-pattern=\"^(creates|advances|simulates|results|renders navigation|end of year|opening the next|Hall|repairs|renders full|uses realistic|career plans|facility|rider and team|rarity|specialists|deterministic|v1.2|rider overview)\" tests/engine.test.js",
     "build:fallback": "node scripts/build.mjs",
     "test:skills": "node scripts/qa-skills-v13.mjs",
     "test:balance": "node scripts/qa-race-balance-v15.mjs",
-    "test:long": "node --test tests/long.test.js"
+    "test:long": "node --test --test-concurrency=1 tests/long.test.js",
+    "test:chronicle": "node --test --test-name-pattern=\"^(rider totals|calendar selection|Grand Tour fatigue|market licence|weekly UCI|Chronicle parity|watchlists)\" tests/engine.test.js"
   },
   "dependencies": {
     "react": "^19.1.0",
