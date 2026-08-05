@@ -1,7 +1,34 @@
-# Peloton Chronicle v1.5
+# Peloton Chronicle v1.6.1
 
 A Vite + React modern-era professional road-cycling world simulation. The universe advances by calendar weeks while riders, directors, team organizations, sponsors, race editions and completed seasons remain searchable in a permanent historical archive.
 
+
+
+
+## v1.6.1 ranking and profile clarity
+
+- The UCI Rankings page now always uses the live rolling 52-week ledger—the same source shown on rider profiles.
+- Historical week/year selectors were removed from the interface. Weekly snapshots remain compact internal history for career peaks and No. 1 reigns.
+- Added a continuous **All No. 1 reigns** ledger with start week, duration, and maximum points.
+- Current rider rankings include career peak rank and peak points.
+- Rider development now uses a labelled SVG curve with career year on X and multiplier on Y.
+- Race shape and fatigue now appear immediately below the rider profile hero.
+- The navigation sidebar was redesigned as an aged-paper cycling annual index.
+
+## v1.6 Chronicle parity expansion
+
+- **Historical weekly rankings:** reopen stored UCI ranking weeks with movement, point changes, peak-rank milestones and upcoming points expiry.
+- **My Chronicle:** follow riders, teams, directors, races and nations from any full page; the Results desk surfaces their latest status.
+- **Rider parity:** six tabs now cover Overview, Current season, Career, Rivalries, Development and Records.
+- **Cycling rivalries:** shared Grand Tours, Monuments, podiums, close battles and direct finishing advantage create organic career rivals.
+- **Prospect world:** a dedicated U23 ranking, readiness view and annual graduation-class archive.
+- **Nation pages:** current stars, youth pipelines, major honors and emerging golden generations.
+- **Cycling-aware generation:** elite nationality probabilities and terrain tendencies reflect cycling tradition without preventing unusual national stars.
+- **Editorial intelligence:** Le Grand Braquet adds Ranking Watch, Form & Condition, Record Watch and Rivalry Watch.
+- **Result explanations:** major results identify condition, terrain, team and tactical factors rather than presenting an unexplained winner.
+- **Compact persistence:** ranking snapshots store references rather than full rider records; the five-season save remains below the 16 MB regression target.
+
+The complete functional design is in `CHRONICLE_PARITY_v1.6.md`; validation is in `QA_REPORT_v1.6.md`.
 
 
 ## v1.5 calendar, condition and classification model
@@ -126,7 +153,7 @@ Run `npm run build`, then upload the contents of `dist/` to the web root.
 
 ## Save architecture
 
-Peloton Chronicle v1.5 does **not** require Neon or another backend. Universes are stored in IndexedDB, with three save drawers and JSON export. Saves remain local to the browser and device. Clearing browser site data deletes local universes, so use **Save & Settings → Export JSON** for external backups.
+Peloton Chronicle v1.6 does **not** require Neon or another backend. Universes are stored in IndexedDB, with three save drawers and JSON export. Saves remain local to the browser and device. Clearing browser site data deletes local universes, so use **Save & Settings → Export JSON** for external backups.
 
 Existing older universes are upgraded when opened. A new universe is still recommended when testing generation or balance changes because an old save preserves its existing population and prior results.
 

@@ -735,3 +735,65 @@ p,.story p,.page-head p,.profile-hero p,.muted{font-family:var(--body-copy)}
 .result-explanation{margin-top:14px;padding:16px;border:1px solid rgba(75,43,22,.28);background:rgba(246,235,205,.7)}.result-explanation>div:last-child{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.result-explanation article{padding:11px;background:rgba(255,252,240,.8);border-left:4px solid #8b6230}.result-explanation article.positive{border-color:#3d7250}.result-explanation strong,.result-explanation small{display:block}
 @media(max-width:1000px){.my-chronicle-grid,.rivalry-grid,.prospect-hero-grid,.nation-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.record-ledger-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:680px){.my-chronicle.empty{display:block}.my-chronicle.empty .btn{margin-top:12px}.my-chronicle-grid,.rivalry-grid,.record-ledger-grid,.prospect-hero-grid,.graduation-grid,.nation-grid,.magazine-intelligence-grid{grid-template-columns:1fr}.ranking-ribbon{grid-template-columns:repeat(2,1fr)}.milestone-list{grid-template-columns:1fr}.country-hero{grid-template-columns:1fr}.result-explanation>div:last-child{grid-template-columns:repeat(2,1fr)}.detail-actions{justify-content:flex-start}}
+
+
+/* ========================================================================== 
+   Peloton Chronicle v1.6.1 — ranking clarity, editorial sidebar & curve chart
+   ========================================================================== */
+.sidebar{
+  color:#2a2018;
+  border-right:8px double #6f3a31;
+  background:
+    linear-gradient(rgba(239,224,193,.90),rgba(225,204,164,.88)),
+    url('./assets/newsprint-texture.webp') center top/620px auto repeat;
+  box-shadow:8px 0 22px rgba(52,31,18,.18),inset -1px 0 rgba(255,255,255,.55);
+}
+.brand{
+  margin:-6px -2px 12px;
+  padding:16px 13px 27px;
+  border:1px solid #9c7b55;
+  border-block-width:3px;
+  background:rgba(252,244,224,.50);
+  box-shadow:inset 0 0 28px rgba(94,58,28,.07),3px 4px 0 rgba(100,64,32,.09);
+}
+.brand::before{content:"ÉDITION ANNUELLE";display:block;margin-bottom:11px;color:#742d31;font:700 .62rem var(--body-copy);font-style:italic;letter-spacing:.14em}
+.brand::after{color:#6b4a2d;font-family:var(--ui)}
+.brand-kicker{color:#684a30;font-family:var(--ui);font-size:.58rem;letter-spacing:.17em}
+.brand h1{color:#4b2023;font:900 2.35rem/.86 var(--display);text-shadow:none;letter-spacing:-.045em}
+.brand p{color:#5f4b37;font-family:var(--body-copy);font-style:italic;font-size:.76rem}
+.nav{padding-top:8px;gap:1px}
+.nav-section{position:relative;margin:19px 8px 7px;padding-bottom:5px;color:#6f2d31;font-family:var(--ui);font-size:.58rem;letter-spacing:.16em;border-bottom:1px solid rgba(105,71,42,.35)}
+.nav-section::after{content:"";position:absolute;left:0;bottom:-1px;width:34px;height:2px;background:#8d403f}
+.nav button{
+  min-height:42px;
+  padding:9px 10px;
+  color:#382b22;
+  border:1px solid transparent;
+  border-radius:0;
+  font-family:var(--body-copy);
+  font-size:.9rem;
+  font-weight:700;
+}
+.nav button span{width:22px;color:#875d31;font-family:var(--display);font-size:.92rem;text-align:center}
+.nav button:hover{color:#5d2529;background:rgba(255,249,232,.52);border-color:rgba(122,82,47,.25);transform:translateX(2px)}
+.nav button.active{
+  color:#fff5dc;
+  background:linear-gradient(90deg,#4c2225,#6d3034);
+  border-color:#381719;
+  box-shadow:inset 4px 0 #c19a50,3px 3px 0 rgba(70,42,24,.13);
+}
+.nav button.active span{color:#e8c879}.nav button.active::before{display:none}
+.sidebar-footer{color:#574431;border-color:#9f7b52;border-left:4px solid #7b3337;background:rgba(255,249,231,.40);font-family:var(--body-copy);font-style:italic}
+
+.simplified-ranking-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;padding:12px 14px;border-block:3px double var(--ink);background:rgba(246,235,207,.62)}
+.ranking-source-note{display:flex;gap:10px;align-items:baseline}.ranking-source-note strong{font-family:var(--display);color:var(--wine);font-size:1rem}.ranking-source-note span{color:var(--muted);font-size:.76rem}
+.number-one-ledger{margin-top:20px}.reigns-table td{font-size:.93rem}.reigns-table td:nth-child(3),.reigns-table td:nth-child(4){font-variant-numeric:tabular-nums;font-size:1rem}.block{display:block;margin-top:2px;color:var(--muted);font-family:var(--ui);font-size:.58rem;text-transform:uppercase;letter-spacing:.06em}
+
+.profile-status-ribbon{margin-top:14px;margin-bottom:12px;border-block:4px double var(--wine-dark);background:linear-gradient(90deg,rgba(245,232,199,.85),rgba(255,249,232,.72))}
+.profile-status-ribbon>div{padding-block:12px}.profile-status-ribbon strong{font-size:1.85rem}.overview-kpis{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+
+.development-ledger{overflow:hidden}.development-chart-wrap{width:100%;overflow-x:auto;padding:5px 4px 0}.development-chart{display:block;width:100%;min-width:680px;height:auto;overflow:visible}.chart-grid line{stroke:rgba(86,62,42,.20);stroke-width:1;stroke-dasharray:4 5}.chart-grid text,.chart-point text,.chart-axis-title{fill:#6c5b48;font-family:var(--ui);font-size:12px}.chart-axis{stroke:#2f271f;stroke-width:1.5}.chart-area{stroke:none}.chart-line{fill:none;stroke:var(--wine);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}.chart-point circle{fill:#f6ecd4;stroke:var(--wine);stroke-width:3}.chart-point.active circle{fill:var(--gold);stroke:var(--wine-dark);stroke-width:4}.chart-current-label{fill:var(--wine-dark)!important;font-family:var(--display)!important;font-weight:900;font-size:15px!important}.chart-axis-title{font-weight:900;letter-spacing:.07em;text-transform:uppercase}
+
+@media(max-width:980px){.sidebar{border-right-width:5px}.overview-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}.simplified-ranking-toolbar{align-items:flex-start;flex-direction:column}.ranking-source-note{display:grid;gap:2px}}
+@media(max-width:760px){.sidebar{background:linear-gradient(rgba(239,224,193,.94),rgba(225,204,164,.94)),url('./assets/newsprint-texture.webp') center/520px auto repeat}.brand h1{font-size:2.05rem}.nav button{font-size:.86rem}.profile-status-ribbon{grid-template-columns:repeat(2,minmax(0,1fr))}.development-chart{min-width:620px}}
+@media(max-width:430px){.overview-kpis{grid-template-columns:1fr!important}.ranking-ribbon{grid-template-columns:1fr}.profile-status-ribbon{grid-template-columns:1fr}.profile-status-ribbon>div{border-right:0!important;border-bottom:1px solid var(--line)}.profile-status-ribbon>div:last-child{border-bottom:0}}

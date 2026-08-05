@@ -421,3 +421,35 @@ test('watchlists and ranking milestones are save-compatible Chronicle data', () 
   assert.equal(upgraded.version, 16);
   assert.ok(upgraded.weeklyRankings.length > 0);
 });
+
+test('UCI rankings render the live ledger and condense history into number-one reigns', () => {
+  const state = createUniverse({ seed: 160004 });
+  simulateWeeks(state, 24);
+  const live = uciRankings(state, 'rolling');
+  const leader = live.riders[0];
+  assert.ok(leader);
+  const html = renderPageForTest(state, 'rankings');
+  assert.match(html, /Live rolling 52 weeks/);
+  assert.match(html, /All No\. 1 reigns/);
+  assert.doesNotMatch(html, /id="ranking-week"/);
+  assert.doesNotMatch(html, /id="ranking-year"/);
+  assert.match(html, new RegExp(leader.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(html, new RegExp(new Intl.NumberFormat('en-US').format(leader.points)));
+  assert.match(html, /Peak rank/);
+  assert.match(html, /Peak points/);
+});
+
+test('rider overview exposes condition beside the hero and development uses a labelled chart', () => {
+  const state = createUniverse({ seed: 160005 });
+  simulateWeeks(state, 12);
+  const rider = state.riders.find(row => !row.retired && row.currentSeason.starts > 0) || state.riders[0];
+  const overview = renderRiderPageForTest(state, rider.id, 'overview');
+  const development = renderRiderPageForTest(state, rider.id, 'development');
+  assert.match(overview, /profile-status-ribbon/);
+  assert.match(overview, /Race shape/);
+  assert.match(overview, /Fatigue/);
+  assert.ok(overview.indexOf('profile-status-ribbon') < overview.indexOf('ranking-ribbon'));
+  assert.match(development, /development-chart/);
+  assert.match(development, /Multiplier/);
+  assert.match(development, /Career year/);
+});
