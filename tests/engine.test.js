@@ -418,7 +418,7 @@ test('watchlists and ranking milestones are save-compatible Chronicle data', () 
   assert.ok(Array.isArray(state.rankingMilestones));
   assert.ok(Array.isArray(state.graduationClasses));
   const upgraded = upgradeUniverse(structuredClone(state));
-  assert.equal(upgraded.version, 17);
+  assert.equal(upgraded.version, 18);
   assert.ok(upgraded.weeklyRankings.length > 0);
 });
 
@@ -463,7 +463,7 @@ test('official rivalries require five elite shared podiums with wins for both ri
   const created = detectSeasonRivalries(state);
   assert.equal(created.length, 1);
   assert.equal(created[0].declaration.sharedPodiums, 5);
-  assert.equal(created[0].headToHead.length, 0);
+  assert.equal(created[0].headToHead.length, 5);
   const page = renderRivalryPageForTest(state, created[0].id, 'overview');
   assert.match(page, /Official rivalry/);
   assert.match(page, /Stage wins by type/);
