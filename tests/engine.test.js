@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildRiderSkills, captureWeeklyRankingSnapshot, createUniverse, currentAbility, dayOfYear, ELITE_TARGETS, facilityUpgradeCost, hallScore, openNextSeason, riderRankingHistory, riderRecordBook, riderRivalries, simulateNextEvent, simulateSeason, simulateWeeks, SPECIALTY_CORE_SKILLS, stageSkillRating, uciRankings, upgradeUniverse } from '../src/engine.js';
+import { buildRiderSkills, captureWeeklyRankingSnapshot, createUniverse, currentAbility, dayOfYear, detectSeasonRivalries, ELITE_TARGETS, facilityUpgradeCost, hallScore, openNextSeason, riderRankingHistory, riderRecordBook, simulateNextEvent, simulateSeason, simulateUntilEvent, simulateWeeks, SPECIALTY_CORE_SKILLS, stageSkillRating, uciRankings, upgradeUniverse } from '../src/engine.js';
 import { RARITIES } from '../src/data.js';
-import { renderDirectorPageForTest, renderFilteredResultsForTest, renderPageForTest, renderRiderPageForTest, renderRidersForTest, renderTeamPageForTest, renderTeamsForTest } from '../src/app.js';
+import { renderDirectorPageForTest, renderFilteredResultsForTest, renderMagazineForTest, renderPageForTest, renderRacePageForTest, renderRankingsForTest, renderRiderPageForTest, renderRidersForTest, renderRivalryPageForTest, renderTeamPageForTest, renderTeamsForTest } from '../src/app.js';
 
 test('creates the intended modern cycling world', () => {
   const state = createUniverse({ seed: 42 });
@@ -60,7 +60,7 @@ test('renders navigation, working race links and a full rider year breakdown', (
   const teams = renderPageForTest(state, 'teams');
   const directors = renderPageForTest(state, 'directors');
   const stats = renderPageForTest(state, 'stats');
-  const raceDetail = renderPageForTest(state, 'race-detail');
+  const raceDetail = renderRacePageForTest(state, state.events.find(event => event.stageProfiles.length > 1 && event.editions?.length)?.id || state.events[0].id, 'current');
   const magazine = renderPageForTest(state, 'magazine');
   const rider = state.riders.find(item => item.currentSeason.stageWins > 0) || state.riders[0];
   const riderPage = renderRiderPageForTest(state, rider.id, 'history');
@@ -95,9 +95,9 @@ test('end of year closes the current season without opening the next one', () =>
   assert.ok(output.archive.summary.topRider);
   assert.equal(state.eventIndex, state.events.length);
   const review = renderPageForTest(state, 'results');
-  assert.match(review, /Open 2027 season|Move to 2027/);
-  assert.match(review, /2026 is complete/);
-  assert.match(review, /2026 Season Review/);
+  assert.match(review, /Move to Year 2/);
+  assert.match(review, /Year 1 is complete/);
+  assert.match(review, /Year 1 Season Review/);
   assert.match(review, /December 31/);
 });
 
@@ -405,10 +405,10 @@ test('Chronicle parity pages expose prospects nations and expanded rider records
   assert.match(renderPageForTest(state, 'nations'), /National cycling cultures/);
   assert.match(renderRiderPageForTest(state, rider.id, 'development'), /Development/);
   assert.match(renderRiderPageForTest(state, rider.id, 'records'), /Peak world rank/);
-  assert.match(renderRiderPageForTest(state, rider.id, 'rivalries'), /Rivalries/);
+  assert.doesNotMatch(renderRiderPageForTest(state, rider.id, 'overview'), /data-rider-tab="rivalries"/);
+  assert.match(renderMagazineForTest(state, 'rivalries'), /Declared rivalries/);
   const records = riderRecordBook(state, rider.id);
   assert.ok('peakRank' in records);
-  assert.ok(Array.isArray(riderRivalries(state, rider.id)));
 });
 
 test('watchlists and ranking milestones are save-compatible Chronicle data', () => {
@@ -418,25 +418,103 @@ test('watchlists and ranking milestones are save-compatible Chronicle data', () 
   assert.ok(Array.isArray(state.rankingMilestones));
   assert.ok(Array.isArray(state.graduationClasses));
   const upgraded = upgradeUniverse(structuredClone(state));
-  assert.equal(upgraded.version, 16);
+  assert.equal(upgraded.version, 17);
   assert.ok(upgraded.weeklyRankings.length > 0);
 });
 
-test('UCI rankings render the live ledger and condense history into number-one reigns', () => {
+test('race dossiers use overview current history and records tabs without duplicate page headers', () => {
+  const state = createUniverse({ seed: 170001 });
+  simulateWeeks(state, 22);
+  const event = state.events.find(row => row.editions?.length) || state.events[0];
+  const overview = renderRacePageForTest(state, event.id, 'overview');
+  const history = renderRacePageForTest(state, event.id, 'history');
+  const records = renderRacePageForTest(state, event.id, 'records');
+  assert.match(overview, /Overview/);
+  assert.match(overview, /Current year/);
+  assert.match(history, /Edition history/);
+  assert.match(records, /Most victories/);
+  assert.equal((overview.match(/race-page-masthead/g)||[]).length, 1);
+});
+
+test('showcase simulation stops before selected Grand Tours and preserves prior results', () => {
+  const state = createUniverse({ seed: 170002 });
+  state.settings.showcase = { grandTours:true, monuments:false, worlds:false };
+  const output = simulateUntilEvent(state, 'giro');
+  assert.equal(output.ready, true);
+  assert.equal(state.events[state.eventIndex].id, 'giro');
+  assert.ok(state.eventResults.length > 0);
+  assert.ok(state.eventResults.every(row => row.eventId !== 'giro'));
+  assert.ok(state.currentDay < dayOfYear(state.year, 5, 9));
+});
+
+test('official rivalries require five elite shared podiums with wins for both riders', () => {
+  const state = createUniverse({ seed: 170003 });
+  const [a,b,c] = state.riders;
+  const ids = ['sanremo','flanders','roubaix','liege','lombardia'];
+  state.eventResults = ids.map((eventId,index) => ({
+    year:state.year,eventId,eventName:state.events.find(e=>e.id===eventId).name,prestige:95,
+    winnerId:index===4?b.id:a.id,
+    classification:[
+      {rank:index===4?2:1,riderId:a.id,name:a.name,teamId:a.teamId,gap:index===4?21:0},
+      {rank:index===4?1:2,riderId:b.id,name:b.name,teamId:b.teamId,gap:index===4?0:21},
+      {rank:3,riderId:c.id,name:c.name,teamId:c.teamId,gap:80}
+    ]
+  }));
+  const created = detectSeasonRivalries(state);
+  assert.equal(created.length, 1);
+  assert.equal(created[0].declaration.sharedPodiums, 5);
+  assert.equal(created[0].headToHead.length, 0);
+  const page = renderRivalryPageForTest(state, created[0].id, 'overview');
+  assert.match(page, /Official rivalry/);
+  assert.match(page, /Stage wins by type/);
+});
+
+test('statistics absorbs Almanac and Le Grand Braquet absorbs rivalries and Hall of Fame', () => {
+  const state = createUniverse({ seed: 170004 });
+  const stats = renderPageForTest(state, 'stats');
+  const magazine = renderMagazineForTest(state, 'hall');
+  assert.match(stats, /Statistics & Almanac/);
+  assert.match(stats, /data-stats-tab="almanac"/);
+  assert.match(magazine, /Hall of Fame/);
+  assert.doesNotMatch(stats, /data-route="almanac"/);
+});
+
+test('UCI rankings separate the live table from clean number-one reigns', () => {
   const state = createUniverse({ seed: 160004 });
   simulateWeeks(state, 24);
   const live = uciRankings(state, 'rolling');
   const leader = live.riders[0];
   assert.ok(leader);
-  const html = renderPageForTest(state, 'rankings');
-  assert.match(html, /Live rolling 52 weeks/);
-  assert.match(html, /All No\. 1 reigns/);
-  assert.doesNotMatch(html, /id="ranking-week"/);
-  assert.doesNotMatch(html, /id="ranking-year"/);
-  assert.match(html, new RegExp(leader.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-  assert.match(html, new RegExp(new Intl.NumberFormat('en-US').format(leader.points)));
-  assert.match(html, /Peak rank/);
-  assert.match(html, /Peak points/);
+  const current = renderRankingsForTest(state, 'current');
+  const reigns = renderRankingsForTest(state, 'reigns');
+  assert.match(current, /Live rolling 52 weeks/);
+  assert.doesNotMatch(current, /All No\. 1 reigns/);
+  assert.match(reigns, /All No\. 1 reigns/);
+  assert.match(reigns, /Most weeks at No\. 1/);
+  assert.match(reigns, /Longest reigns/);
+  assert.doesNotMatch(reigns, /id="ranking-week"/);
+  assert.doesNotMatch(reigns, /id="ranking-year"/);
+  assert.match(current, new RegExp(leader.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(current, new RegExp(new Intl.NumberFormat('en-US').format(leader.points)));
+  assert.match(current, /Peak rank/);
+  assert.match(current, /Peak points/);
+  assert.match(reigns, /Year 1/);
+});
+
+test('consecutive number-one weeks never split into duplicate reigns', () => {
+  const state = createUniverse({ seed: 160006 });
+  const [first, second] = state.riders;
+  state.currentDay = 112;
+  state.weeklyRankings = [
+    { year: 2026, week: 1, day: 1, riders: [[first.id, 500, 1, first.teamId, first.tier]], teams: [] },
+    { year: 2026, week: 7, day: 43, riders: [[first.id, 900, 1, first.teamId, first.tier]], teams: [] },
+    { year: 2026, week: 16, day: 106, riders: [[second.id, 1100, 1, second.teamId, second.tier]], teams: [] }
+  ];
+  const html = renderRankingsForTest(state, 'reigns');
+  assert.match(html, /Y1 W1<\/td><td>Y1 W15<\/td>/);
+  assert.match(html, new RegExp(first.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(html, />15w<\/strong>/);
+  assert.doesNotMatch(html, /Y1 W7<\/td><td>Y1 W15/);
 });
 
 test('rider overview exposes condition beside the hero and development uses a labelled chart', () => {

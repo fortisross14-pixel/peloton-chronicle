@@ -1,18 +1,21 @@
 {
   "name": "peloton-chronicle",
   "private": true,
-  "version": "1.6.1",
+  "version": "1.7.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test --test-name-pattern=\"^(creates|advances|simulates|results|renders navigation|end of year|opening the next|Hall|repairs|renders full|uses realistic|career plans|facility|rider and team|rarity|specialists|deterministic|v1.2|rider overview|UCI rankings render)\" tests/engine.test.js",
+    "test": "npm run test:core-a",
     "build:fallback": "node scripts/build.mjs",
     "test:skills": "node scripts/qa-skills-v13.mjs",
     "test:balance": "node scripts/qa-race-balance-v15.mjs",
-    "test:long": "node --test --test-concurrency=1 tests/long.test.js",
-    "test:chronicle": "node --test --test-name-pattern=\"^(rider totals|calendar selection|Grand Tour fatigue|market licence|weekly UCI|Chronicle parity|watchlists|UCI rankings render|rider overview exposes condition)\" tests/engine.test.js"
+    "test:long": "node --test --test-concurrency=1 --test-reporter=spec tests/long.test.js",
+    "test:chronicle": "node --test --test-concurrency=1 --test-reporter=spec --test-name-pattern=\"^(rider totals|calendar selection|Grand Tour fatigue|market licence|weekly UCI|Chronicle parity|watchlists|UCI rankings|consecutive number|rider overview exposes condition)\" tests/engine.test.js",
+    "test:core-a": "node --test --test-concurrency=1 --test-reporter=spec --test-name-pattern=\"^(creates|advances|simulates|results|renders navigation|end of year|opening the next|Hall|repairs|renders full)\" tests/engine.test.js",
+    "test:core-b": "node --test --test-concurrency=1 --test-reporter=spec --test-name-pattern=\"^(uses realistic|career plans|facility|rider and team|rarity|specialists|deterministic|v1.2|rider overview|UCI rankings|consecutive number)\" tests/engine.test.js",
+    "test:v17": "node --test --test-concurrency=1 --test-reporter=spec --test-name-pattern=\"^(race dossiers|showcase simulation|official rivalries|statistics absorbs)\" tests/engine.test.js"
   },
   "dependencies": {
     "react": "^19.1.0",

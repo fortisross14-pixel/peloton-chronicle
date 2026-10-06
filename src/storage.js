@@ -41,7 +41,7 @@ export async function listUniverses() {
     request.onsuccess = () => {
       const rows = request.result
         .sort((a, b) => a.slot - b.slot)
-        .map(({ slot, name, year, currentDay, eventIndex, updatedAt, createdAt, state }) => ({ slot, name, year, currentDay: currentDay ?? state?.currentDay ?? 1, eventIndex, updatedAt, createdAt }));
+        .map(({ slot, name, startYear, year, currentDay, eventIndex, updatedAt, createdAt, state }) => ({ slot, name, startYear: startYear ?? state?.startYear ?? 2026, year, currentDay: currentDay ?? state?.currentDay ?? 1, eventIndex, updatedAt, createdAt }));
       resolve(rows);
     };
     request.onerror = () => reject(request.error);
@@ -65,6 +65,7 @@ export async function saveUniverse(slot, state) {
   const record = {
     slot,
     name: state.name,
+    startYear: state.startYear ?? 2026,
     year: state.year,
     currentDay: state.currentDay,
     eventIndex: state.eventIndex,
