@@ -1,9 +1,39 @@
-# Peloton Chronicle v1.6.1
+# Peloton Chronicle v1.9
 
 A Vite + React modern-era professional road-cycling world simulation. The universe advances by calendar weeks while riders, directors, team organizations, sponsors, race editions and completed seasons remain searchable in a permanent historical archive.
 
 
 
+
+## v1.9 race engine, group 3: incidents, balance and saves
+
+- **Crashes, illness and abandons:** riders crash in the bunch, in sprint finales, on descents and on cobbles; most remount, some ride on hurt, some abandon. Stage races add overnight illness. Grand Tours lose roughly 10–15 riders. Abandons appear on results pages and in race radio; a race leader who abandons hands the jersey on.
+- **Injuries and comebacks:** injuries keep riders out for days to a whole season, and a long injury late in a career can end it. The rider profile shows the injury and the season list shows each DNF. Le Grand Braquet reports notable injuries, returns to racing and comeback victories.
+- **Competitive balance:** WorldTeams operate under a payroll cap and may hold at most three Generational, Legend or Epic riders; stars prefer teams where they can lead, and sharing leadership lowers their happiness.
+- **Race reports from the race:** stage-race stories name where the race turned, the decisive move, the margin, the jerseys and the notable abandons.
+- **Smaller saves:** saves drop zero and empty values and store race details by race id (both restored on load); old weekly ranking snapshots keep the top ten after recording every rider's career-best ranking; retired riders without a notable career keep totals and wins but not race-by-race breakdowns. A five-season save is about 8 MB (previously about 16 MB), fifteen seasons about 17 MB (previously about 37 MB).
+- **Saving no longer replaces the live game state,** which previously forced the full save upgrade to run again after every autosave.
+- **Tests:** the balance guard checks abandon rates, that abandoned riders leave the classification and that injured riders sit out; the five-season test checks the elite cap, the compacted save size and a full save-and-load round trip.
+
+## v1.8 race engine, group 2: stage races and Grand Tours
+
+- **Grand Tours redrawn every year** (`src/stageRoutes.js`): each Giro, Tour and Vuelta edition gets its own route from the race's identity — 1–3 time trials totalling 15–75 km, 6–10 mountain stages, a variable number of summit finishes, named climbs (Galibier, Stelvio, Angliru…), rest days and a queen stage. Some years suit time-triallists, others pure climbers. Week-long races build their stages from their terrain.
+- **Every stage ridden by the race engine** (`src/stageRace.js`): GC comes from real stage times and finish bonuses; points from finishes and intermediate sprints; mountains from the order over each categorised summit; team classification from the best three riders each day. Fatigue carries between stages and eases on rest days; bad days strike more often in the third week.
+- **Team tactics:** each team protects one leader whose domestiques set the pace and pace him back after punctures; sprinters get lead-outs; the leader's team decides how much rope a break gets, and loses control more easily late in the race, so a GC rider minutes down can gamble on a long-range move and become the virtual leader on the road. Breakaways win more often as the race wears on.
+- **Individual time trials** are raced rider by rider, with the hot seat changing hands and the GC leader starting last.
+- **Full Grand Tour squads:** teams plan their eight-rider Grand Tour squads before the season, spread their leaders across the three races, and protect each squad's preparation month. Fields now start with about 180 riders instead of 50–90.
+- **Old patches removed:** repeat-win penalties, compressed time gaps, the points/mountains override, the injected breakaway and the unused Grand Tour tax are gone; condition and race preference now fine-tune results instead of overriding talent.
+- **Live stage races:** key stages (mountains, time trials, cobbles, gravel, queen, first and last) play kilometre by kilometre, with the route, groups, virtual leader, race radio, GC and jerseys; other stages show their result. Rest days pause the race. Result pages have stage-by-stage stories.
+- **Balance guard extended:** `npm run test:race-balance` now also checks Grand Tour fields, winners, margins, leader changes, breakaway success by week, jersey winners and stage-winner types across ten universes.
+
+## v1.7 race engine, group 1: one-day races
+
+- **Real routes:** Monuments and the main classics are raced over named climbs, cobbled sectors and gravel roads (`src/routes.js`), with the finish type that decides them (bunch sprint, uphill, velodrome, descent...). Milano–Sanremo is now a long race for sprinters and puncheurs decided on the Cipressa and Poggio.
+- **Moment-based racing:** `src/raceEngine.js` rides each one-day race kilometre by kilometre. A breakaway forms and builds a lead, the peloton chases (or hesitates), each sector thins the front group, favourites attack in the finale, outsiders get away while the favourites watch each other, chasers organise, and punctures strike on rough roads. Finishing order and time gaps come from that single run.
+- **Skill-fit scoring:** one-day results come from how well a rider's skills fit each sector and finish, with specialisation amplified on race day. Repeat-win and terrain-penalty patches no longer apply to one-day races. Riders' race preferences now follow their terrain, and race targeting uses the actual route, so cobbles riders build their seasons around Flanders and Roubaix.
+- **Live playback:** Monuments and the Worlds road race replay the real race: route profile, groups on the road with gaps, and race radio. Results pages and the winner screen show how the race unfolded.
+- **Faster simulation:** the full save upgrade runs once per loaded save instead of before every race (about 6× faster seasons).
+- **Balance guard:** `npm run test:race-balance` simulates one season in ten universes and fails if favourite win rates, breakaway success, winning margins or terrain fit drift out of range.
 
 ## v1.6.1 ranking and profile clarity
 

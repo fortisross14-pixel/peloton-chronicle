@@ -60,8 +60,12 @@ export async function loadUniverse(slot) {
   });
 }
 
-export async function saveUniverse(slot, state) {
+// Saves a compacted copy (when a serializer is given) but hands back the live state object,
+// so the game keeps working on the same, already-upgraded universe.
+export async function saveUniverse(slot, state, serialize = null) {
   const now = new Date().toISOString();
+  state.createdAt = state.createdAt || now;
+  state.updatedAt = now;
   const record = {
     slot,
     name: state.name,
@@ -71,10 +75,10 @@ export async function saveUniverse(slot, state) {
     eventIndex: state.eventIndex,
     createdAt: state.createdAt || now,
     updatedAt: now,
-    state: { ...state, createdAt: state.createdAt || now, updatedAt: now }
+    state: serialize ? serialize(state) : { ...state }
   };
   await transaction('readwrite', (store) => store.put(record));
-  return record.state;
+  return state;
 }
 
 export async function deleteUniverse(slot) {

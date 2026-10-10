@@ -842,3 +842,71 @@ p,.story p,.page-head p,.profile-hero p,.muted{font-family:var(--body-copy)}
 @media(max-width:680px){.gc-live-row{grid-template-columns:28px minmax(0,1fr) auto}.gc-live-row small{flex-basis:100%;margin-left:0}.showcase-title>div:last-child{text-align:left}.live-speed{justify-content:flex-start}.showcase-title>div:last-child>strong{font-size:2.6rem}.gt-chart-legend small{margin-left:0;flex-basis:100%}}
 
 .showcase-week-break{margin-top:18px;padding:18px 20px;border-top:3px double var(--wine,#6e2331);border-bottom:1px solid rgba(70,45,30,.22);background:rgba(248,239,216,.82);display:flex;align-items:center;justify-content:space-between;gap:18px}.showcase-week-break div{display:flex;flex-direction:column;gap:3px}.showcase-week-break strong{font-family:Georgia,'Times New Roman',serif;font-size:1.08rem;color:var(--ink,#2c261f)}.showcase-week-break span{font-size:.94rem;color:var(--muted,#6c6258)}@media(max-width:720px){.showcase-week-break{align-items:stretch;flex-direction:column}.showcase-week-break .btn{width:100%}}
+
+/* Moment-based one-day races */
+.route-strip{position:relative;margin:0 0 16px;padding:14px 16px 8px;border:1px solid var(--line);background:rgba(250,242,219,.82)}
+.route-strip svg{display:block;width:100%;height:118px;overflow:visible}
+.route-fill{fill:rgba(116,45,49,.10)}
+.route-fill.done{fill:rgba(116,45,49,.30)}
+.route-line{fill:none;stroke:var(--wine-dark);stroke-width:2;vector-effect:non-scaling-stroke}
+.route-base{stroke:var(--line-dark,#8a7457);stroke-width:1;vector-effect:non-scaling-stroke}
+.route-now{stroke:var(--wine);stroke-width:2;stroke-dasharray:4 3;vector-effect:non-scaling-stroke}
+.route-peak{fill:var(--paper,#f4e9cf);stroke:var(--wine-dark);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.route-peak.cobbled-climb{fill:var(--mustard,#b48a2c)}
+.route-cobbles{fill:var(--mustard,#b48a2c);opacity:.85}
+.route-gravel{fill:var(--sage,#7d8a62);opacity:.85}
+.route-strip svg text{display:none}
+.route-labels{position:relative;height:16px;margin-top:2px}
+.route-labels span{position:absolute;transform:translateX(-50%);white-space:nowrap;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--wine-dark)}
+.route-labels span:first-child{transform:translateX(-50%)}
+.route-strip figcaption{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font-size:.68rem;color:var(--muted);font-style:italic}
+.one-day-live{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.race-group{padding:10px 0;border-bottom:1px solid var(--line)}
+.race-group:last-child{border-bottom:0}
+.race-group-head{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:baseline;gap:10px}
+.race-group-head strong{font-family:var(--display);font-size:1.05rem;color:var(--ink)}
+.race-group-head small{color:var(--muted);font-size:.72rem}
+.race-group-head b{font-variant-numeric:tabular-nums;color:var(--wine);font-size:.85rem}
+.race-group.break .race-group-head strong,.race-group.lead .race-group-head strong{color:var(--wine-dark)}
+.race-group.lead{border-left:3px solid var(--wine);padding-left:10px}
+.race-group.break{border-left:3px solid var(--mustard,#b48a2c);padding-left:10px}
+.race-group.dropped{opacity:.7}
+.race-group-riders{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px;font-size:.82rem}
+.race-radio{list-style:none;margin:0;padding:0}
+.race-radio li{display:grid;grid-template-columns:52px 18px minmax(0,1fr);gap:6px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line);font-family:var(--body-copy);font-size:.86rem;line-height:1.4}
+.race-radio li:last-child{border-bottom:0}
+.race-radio-km{font-variant-numeric:tabular-nums;font-size:.68rem;font-weight:800;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.race-radio-mark{color:var(--wine);text-align:center}
+.race-radio li.attack span:last-child,.race-radio li.finish span:last-child{font-weight:700;color:var(--ink)}
+.race-radio li.newest{background:rgba(180,138,44,.12);animation:radio-in .45s ease}
+@keyframes radio-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.race-radio li.newest{animation:none}}
+.race-story{margin-top:14px}
+.race-story .route-strip{margin-top:4px}
+.winner-how{margin-top:10px !important;font-style:italic;max-width:62ch}
+@media(max-width:760px){.one-day-live{grid-template-columns:1fr}.route-strip{padding:10px 8px 6px}.route-strip svg{height:84px}.route-labels span:nth-child(n+4){display:none}.race-radio li{grid-template-columns:44px 14px minmax(0,1fr);font-size:.82rem}}
+
+/* Stage-race playback */
+.stage-race-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;margin:-6px 0 14px}
+.stage-race-standings{margin-top:14px}
+.virtual-leader{margin:4px 0 8px;padding:8px 10px;border-left:3px solid var(--wine);background:rgba(116,45,49,.08);font-family:var(--body-copy);font-size:.9rem}
+.stage-how{margin:0 0 6px;font-family:var(--body-copy);font-style:italic}
+.stage-jersey-change{margin:0 0 10px;font-weight:700;color:var(--wine-dark)}
+.jersey-holders{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;margin-bottom:10px}
+.jersey-holder{padding:6px 0 6px 10px;border-left:4px solid var(--line-dark,#8a7457)}
+.jersey-holder small{display:block;font-size:.62rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.jersey-holder.gc{border-left-color:#d4a514}.jersey-holder.points{border-left-color:#3f7d4f}.jersey-holder.mountains{border-left-color:#b23a3a}.jersey-holder.young{border-left-color:#c9c2b0}
+.stage-list.compact .stage-row{padding:5px 0}
+.stage-story-tabs{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 10px}
+.stage-story-tabs button{min-width:34px;padding:5px 7px;border:1px solid var(--line);background:rgba(255,250,236,.7);font:700 .75rem var(--ui,inherit);color:var(--ink);cursor:pointer;border-bottom:3px solid transparent}
+.stage-story-tabs button.mountain{border-bottom-color:#b23a3a}.stage-story-tabs button.itt{border-bottom-color:#2f5d7c}.stage-story-tabs button.flat{border-bottom-color:#3f7d4f}.stage-story-tabs button.hilly{border-bottom-color:#b48a2c}
+.stage-story-tabs button.active{background:var(--wine-dark);color:#fff8e7}
+@media(max-width:760px){.stage-race-controls{justify-content:flex-start}.jersey-holders{grid-template-columns:1fr}}
+.showcase-title.stage-race-title{grid-template-columns:1fr;text-align:left;justify-items:start}
+.route-labels span.edge-end{transform:translateX(-100%)}
+.route-labels span.edge-start{transform:none}
+.condition-ribbon .injury-cell strong{color:var(--wine)}
+.condition-ribbon .injury-cell small{text-transform:none}
+.abandons-card{margin-top:14px}
+.abandon-list .record-row b{font-weight:600;font-style:italic;color:var(--muted);text-transform:none;font-size:.75rem}
+.race-radio li.crash .race-radio-mark,.race-radio li.abandon .race-radio-mark{color:#b23a3a}
