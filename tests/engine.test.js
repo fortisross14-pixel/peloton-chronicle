@@ -418,7 +418,7 @@ test('watchlists and ranking milestones are save-compatible Chronicle data', () 
   assert.ok(Array.isArray(state.rankingMilestones));
   assert.ok(Array.isArray(state.graduationClasses));
   const upgraded = upgradeUniverse(structuredClone(state));
-  assert.equal(upgraded.version, 18);
+  assert.equal(upgraded.version, 19);
   assert.ok(upgraded.weeklyRankings.length > 0);
 });
 

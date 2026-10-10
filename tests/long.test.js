@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildRiderSkills, createUniverse, currentAbility, dayOfYear, ELITE_TARGETS, facilityUpgradeCost, hallScore, openNextSeason, simulateNextEvent, simulateSeason, simulateWeeks, SPECIALTY_CORE_SKILLS, stageSkillRating, uciRankings, upgradeUniverse } from '../src/engine.js';
+import { buildRiderSkills, createUniverse, currentAbility, dayOfYear, ELITE_TARGETS, ELITE_LIMITS, facilityUpgradeCost, hallScore, openNextSeason, simulateNextEvent, simulateSeason, simulateWeeks, SPECIALTY_CORE_SKILLS, stageSkillRating, uciRankings, upgradeUniverse } from '../src/engine.js';
 import { RARITIES } from '../src/data.js';
 import { renderDirectorPageForTest, renderFilteredResultsForTest, renderPageForTest, renderRiderPageForTest, renderRidersForTest, renderTeamPageForTest, renderTeamsForTest } from '../src/app.js';
 
@@ -21,7 +21,7 @@ test('keeps a five-season chronicle structurally valid', () => {
   assert.equal(active.length, rosterIds.length);
   assert.equal(active.filter(rider => rider.tier === 'u23' && rider.age > 22).length, 0);
   for (const [id, baseSkill] of openingBaseSkills) assert.equal(state.riders.find(rider => rider.id === id)?.baseSkill, baseSkill);
-  for (const [rarity, target] of Object.entries(ELITE_TARGETS)) assert.equal(active.filter(rider => rider.rarity === rarity).length, target);
+  for (const [rarity, limits] of Object.entries(ELITE_LIMITS)) { const count=active.filter(rider=>rider.rarity===rarity).length; assert.ok(count>=limits.min&&count<=limits.max, `${rarity} count ${count} outside ${limits.min}-${limits.max}`); }
   assert.equal(active.filter(rider => rider.potential >= 90 && rider.age >= 23 && rider.tier !== 'worldtour').length, 0);
   for (const team of state.teams.filter(team => team.status === 'active')) {
     assert.ok(team.primarySponsor?.name && team.secondarySponsor?.name);
