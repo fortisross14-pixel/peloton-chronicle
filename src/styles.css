@@ -947,3 +947,19 @@ p,.story p,.page-head p,.profile-hero p,.muted{font-family:var(--body-copy)}
 .gc-summary-line small{color:var(--muted)}
 .gc-summary-line .gc-badge{margin:0 2px 0 0}
 .gc-summary-star{font-weight:700;color:var(--wine-dark)}
+/* Live stage popup over the race hub */
+.live-stage-overlay{z-index:45;background:rgba(43,26,20,.55)}
+.live-stage-dialog{width:min(1180px,100%);padding:18px 20px 20px}
+.live-stage-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.live-stage-head p b{color:var(--wine-dark);font-style:normal}
+.live-stage-x{flex:none;width:38px;height:38px;border:1px solid var(--line-dark,#8a7457);background:transparent;color:var(--wine-dark);font-size:1.1rem;cursor:pointer}
+.live-stage-x:hover{background:rgba(122,47,53,.1)}
+.live-stage-controls{position:static;justify-content:flex-start;margin:10px 0 12px;padding:8px 0;border-bottom:1px solid rgba(64,43,27,.18)}
+.live-stage-dialog .one-day-live{margin-top:12px}
+@media(max-width:680px){.live-stage-dialog{padding:14px 12px}.key-stage-overlay.live-stage-overlay{padding:8px}}
+/* Final screen: the race name leads */
+.winner-race-name{position:relative;margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid rgba(255,242,213,.3);font:900 clamp(1.7rem,3.6vw,2.8rem)/1.05 var(--display);letter-spacing:.02em;color:#fff2d5;text-transform:uppercase}
+.winner-race-name span{display:inline-block;margin-left:.3em;color:#e2b85c}
+.winner-race-name .flag-badge{vertical-align:middle;margin-right:.25em}.winner-race-name .flag-badge img{width:44px;height:33px}.winner-race-name .flag-badge small{display:none}
+.winner-celebration .eyebrow{position:relative;color:#e2b85c}
+.winner-celebration h2 .flag-badge small{display:none}
