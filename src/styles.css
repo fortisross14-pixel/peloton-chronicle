@@ -910,3 +910,40 @@ p,.story p,.page-head p,.profile-hero p,.muted{font-family:var(--body-copy)}
 .abandons-card{margin-top:14px}
 .abandon-list .record-row b{font-weight:600;font-style:italic;color:var(--muted);text-transform:none;font-size:.75rem}
 .race-radio li.crash .race-radio-mark,.race-radio li.abandon .race-radio-mark{color:#b23a3a}
+
+/* Stage-race hub, key-stage popup and GC on the road */
+.stage-race-controls.top{justify-content:flex-start;margin:-4px 0 14px;padding:10px 12px;border:1px solid var(--line);background:rgba(250,242,219,.9);position:sticky;top:64px;z-index:5}
+.stage-race-controls.top .btn.gold{order:-1}
+.stage-flash{margin-bottom:14px;border-left:5px solid var(--wine);animation:radio-in .45s ease}
+.stage-flash h3{margin:4px 0;font:900 1.6rem var(--display);color:var(--wine-dark)}
+.stage-flash p{margin:4px 0;font-family:var(--body-copy)}
+.stage-winners-title{margin-top:12px}
+.gc-move{font-style:normal;font-size:.68rem;font-weight:800;margin-right:6px}
+.gc-move.up{color:#3f7d4f}.gc-move.down{color:#b23a3a}.gc-move.same{color:var(--muted)}
+.key-stage-overlay{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:16px;background:rgba(43,26,20,.45);pointer-events:none}
+.key-stage-dialog{pointer-events:auto}
+.key-stage-dialog{width:min(720px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:22px;background:var(--paper,#f4e9cf);border:1px solid var(--line-dark,#8a7457);border-top:6px solid var(--wine);box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.key-stage-dialog h3{margin:6px 0 4px;font:900 clamp(1.5rem,3vw,2.2rem)/1.05 var(--display);color:var(--wine-dark)}
+.key-stage-dialog>p{margin:0 0 12px;color:var(--muted);font-style:italic}
+.key-stage-podium{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0 0 14px;font-size:.88rem}
+.key-stage-podium b{color:var(--wine)}
+.key-stage-actions{display:flex;flex-wrap:wrap;gap:10px}
+.gc-on-road{margin-bottom:14px}
+.gc-watch-row{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.gc-watch-row small{display:block;color:var(--muted);font-size:.72rem}
+.gc-watch-row b{font-size:.82rem;font-weight:700;color:var(--ink);text-align:right}
+.gc-watch-row.break b,.gc-watch-row.lead b{color:var(--wine)}
+.gc-watch-row.dropped b,.gc-watch-row.out b{color:#b23a3a}
+.virtual-podium{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-top:10px;padding:8px 10px;background:rgba(116,45,49,.07)}
+.virtual-podium .vp b{color:var(--wine)}
+@media(max-width:760px){.stage-race-controls.top{top:52px}.gc-watch-row{grid-template-columns:24px minmax(0,1fr)}.gc-watch-row b{grid-column:2;text-align:left}}
+
+/* GC marks inside the race groups */
+.gc-badge{display:inline-block;margin-left:5px;padding:1px 5px;border-radius:2px;font:800 .6rem/1.4 var(--ui,inherit);letter-spacing:.04em;text-transform:uppercase;vertical-align:1px;color:#2b1a14;text-decoration:none}
+.gc-badge.gc1{background:#e3b521}.gc-badge.gc2{background:#c9c4b8}.gc-badge.gc3{background:#c98f5a}
+.virtual-star{margin-left:4px;color:#c8102e;font-size:1rem;line-height:1;vertical-align:-1px;text-decoration:none}
+.race-group.has-gc{background:rgba(227,181,33,.07)}
+.gc-summary-line{display:flex;flex-wrap:wrap;gap:6px 16px;margin:2px 0 8px;padding:7px 9px;background:rgba(116,45,49,.06);font-size:.82rem}
+.gc-summary-line small{color:var(--muted)}
+.gc-summary-line .gc-badge{margin:0 2px 0 0}
+.gc-summary-star{font-weight:700;color:var(--wine-dark)}

@@ -5,6 +5,14 @@ A Vite + React modern-era professional road-cycling world simulation. The univer
 
 
 
+## v1.9.1 Grand Tour race screen
+
+- **Race hub:** a stage race plays on one screen with the GC (with movement), the jerseys and every stage winner. Ordinary stages are revealed one at a time; there are no rest-day stops.
+- **Key stage popups:** before every mountain stage, time trial, cobbled or gravel stage the race pauses and offers *Watch live* or *Show result only*.
+- **GC marks on the road:** during a live stage the riders who started the day 1st, 2nd and 3rd overall carry badges inside whichever group they ride (dropped riders included), a summary line says where each is, and a ★ marks the rider who would lead the race on current results.
+- **Controls on top:** Continue/Pause, 1×/2× and *Jump to the final result* sit in a bar at the top; the top-bar button opens the race screen whenever a race is in progress.
+- **Fixed:** the 2× speed setting was reset to 1× on every click and every tick.
+
 ## v1.9 race engine, group 3: incidents, balance and saves
 
 - **Crashes, illness and abandons:** riders crash in the bunch, in sprint finales, on descents and on cobbles; most remount, some ride on hurt, some abandon. Stage races add overnight illness. Grand Tours lose roughly 10–15 riders. Abandons appear on results pages and in race radio; a race leader who abandons hands the jersey on.

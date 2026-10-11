@@ -221,9 +221,13 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
     groups.sort((a, b) => a.gap - b.gap);
     const entry = { km: Math.round(km), label, groups };
     if (stage?.gc && stage.number > 1) {
-      // Virtual general classification on the road.
-      const onRoad = riders.filter((r) => r.status !== 'dropped' && gcGap(r) != null).map((r) => ({ r, t: gcGap(r) + (head - (r.status === 'break' ? breakGap : r.status === 'lead' ? leadGap : 0)) })).sort((a, b) => a.t - b.t);
-      if (onRoad[0]) entry.virtualLeader = { id: onRoad[0].r.id, margin: Math.round((onRoad[1]?.t ?? onRoad[0].t) - onRoad[0].t) };
+      // Where the overall top three are right now, and the virtual podium if the race ended here.
+      const behindHead = (r) => r.status === 'break' ? head - breakGap : r.status === 'lead' ? head - leadGap : r.status === 'front' ? head : r.status === 'dropped' ? head + r.lost : null;
+      const groupOf = (r) => groups.find((g) => g.kind === r.status)?.label || (r.status === 'out' ? 'Abandoned' : 'Dropped');
+      entry.gcWatch = riders.filter((r) => (gcRank(r) ?? 99) <= 3).sort((a, b) => gcRank(a) - gcRank(b)).map((r) => ({ id: r.id, rank: gcRank(r), overall: Math.round(gcGap(r)), status: r.status, group: groupOf(r), gap: behindHead(r) == null ? null : Math.max(0, Math.round(behindHead(r))) }));
+      const onRoad = riders.filter((r) => r.status !== 'out' && gcGap(r) != null).map((r) => ({ r, t: gcGap(r) + behindHead(r) })).sort((a, b) => a.t - b.t);
+      entry.virtualTop3 = onRoad.slice(0, 3).map((x) => ({ id: x.r.id, gap: Math.round(x.t - onRoad[0].t) }));
+      if (onRoad[0]) entry.virtualLeader = { id: onRoad[0].r.id, status: onRoad[0].r.status, margin: Math.round((onRoad[1]?.t ?? onRoad[0].t) - onRoad[0].t) };
     }
     snapshots.push(entry);
   };
@@ -546,12 +550,16 @@ export function rideTimeTrial({ route, riders, random, stage = null, recordSnaps
       const late = index >= startOrder.length - 25;
       if (late || index % 20 === 0) timeline.push({ km: distance, kind: late ? 'attack' : 'gap', text: previous ? `${x.r.rider.name} goes fastest${previous ? `, ${formatRaceGap(previous.time - x.time)} quicker than ${previous.r.rider.name}` : ''} — ${formatRaceGap(x.time)}.` : `${x.r.rider.name} sets the first benchmark: ${formatRaceGap(x.time)}.`, riderIds: [x.r.id], starter: index + 1 });
     }
-    if (recordSnapshots && ((index + 1) % every === 0 || index === startOrder.length - 1)) {
+    // The last riders off (the GC leaders) get a snapshot each.
+    if (recordSnapshots && ((index + 1) % every === 0 || index >= startOrder.length - 10)) {
       const top = [...finishedTimes].sort((a, b) => a.time - b.time).slice(0, 6);
       const entry = { km: Math.round(distance * (index + 1) / startOrder.length), label: `${index + 1} of ${startOrder.length} riders home`, tt: true, hotSeat: top.map((t) => ({ id: t.r.id, time: t.time })), groups: [] };
       if (stage?.gc && stage.number > 1) {
         const virtual = finishedTimes.map((t) => ({ id: t.r.id, total: (stage.gc.get(t.r.id) ?? 0) + t.time - top[0].time })).sort((a, b) => a.total - b.total);
         entry.virtualLeader = { id: virtual[0].id, margin: Math.round((virtual[1]?.total ?? virtual[0].total) - virtual[0].total) };
+        const home = new Map(finishedTimes.map((t) => [t.r.id, t.time])), best = top[0].time;
+        entry.gcWatch = [...stage.gc.entries()].sort((a, b) => a[1] - b[1]).slice(0, 3).map(([id, overall], i) => ({ id, rank: i + 1, overall: Math.round(overall), status: home.has(id) ? 'home' : 'waiting', group: home.has(id) ? 'Finished' : 'Still to start', gap: home.has(id) ? Math.round(home.get(id) - best) : null }));
+        if (index === startOrder.length - 1) entry.virtualTop3 = virtual.slice(0, 3).map((v) => ({ id: v.id, gap: Math.round(v.total - virtual[0].total) }));
       }
       snapshots.push(entry);
     }
