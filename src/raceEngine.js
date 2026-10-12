@@ -144,6 +144,12 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
   }
   // Riders who have already won stages are watched closely by the rest of the peloton.
   if (stage?.stageWins) for (const r of riders) if ((stage.stageWins.get(r.id) || 0) >= 2) { marked.add(r.id); favorites.add(r.id); }
+  // The overall leader with a big lead rides to defend it, not to win stages.
+  const leaderMarginNow = stage?.gc && stage.number > 1 ? [...stage.gc.values()].sort((a, b) => a - b)[1] ?? 0 : 0;
+  // So does a leader who already has a fistful of stage wins: he gifts the next one to an ally.
+  const raceLeader = stage?.gc && stage.number > 1 ? riders.find((r) => gcRank(r) === 1) || null : null;
+  const comfortableLeader = raceLeader && (leaderMarginNow > 120 || (stage.stageWins?.get(raceLeader.id) || 0) >= 3) ? raceLeader : null;
+  const contenders = new Set(stage ? [...riders].filter((r) => isLeader(r)).sort((a, b) => gcStrength(b) - gcStrength(a)).slice(0, 14).map((r) => r.id) : []);
   const isNotable = (r) => favorites.has(r.id) || r.status === 'lead' || r.status === 'break';
 
   // Bad days: someone always cracks in the third week.
@@ -160,8 +166,11 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
     let weight = 1 + (['proseries', 'continental'].includes(r.team?.tier) ? 1.2 : 0) + (r.rider.program === 'stage-hunter' ? 0.6 : 0) + (['rouleur', 'all-rounder'].includes(r.rider.terrain) ? 0.3 : 0) + random() * 0.8;
     if (stage) {
       const gap = gcGap(r);
-      if (gap != null && gap < threatFloor) weight *= gap < 90 ? 0 : 0.12; // GC riders are rarely allowed to go
+      // Real GC contenders are rarely allowed to go; a domestique a few seconds down is no threat.
+      if (gap != null && gap < threatFloor && contenders.has(r.id)) weight *= gap < 90 ? 0 : 0.12;
       if (sprintRace && isSprinter(r)) weight = 0;
+      // Riders a few minutes down hunt for the leader's jersey in the first two weeks.
+      if (!contenders.has(r.id) && gap != null && gap > 0 && gap <= 600 && stage.number <= 15 && route.type !== 'mountain') weight += 3.5;
       if (mountainStage) weight += Math.max(0, (r.p.climb - r.p.flat) / 6) + (stage.komPoints?.get(r.id) || 0) / 25;
       if (isLeader(r) && (gap ?? 1e9) < 900) {
         // A leader minutes down on a big mountain day late in the race may gamble on a long-range move.
@@ -184,14 +193,14 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
   let maxGap = clamp(150 + random() * 330 + (breakQuality < fieldQuality - 12 ? 60 : 0) - (sprintRace ? 40 : 0), 110, 540);
   let plannedCatchKm = sprintRace ? distance - (3 + random() * 22) : distance - (random() * 50);
   // Stage tactics: on a hard day the peloton may simply let the break fight for the stage.
-  let letGo = false, threat = null, controlled = false, threatActive = false;
+  let letGo = false, threat = null, controlled = false, threatActive = false, giveAway = false;
   if (stage && !sprintRace && breakaway.length) {
     // A leader with minutes in hand has no reason to chase the break for the stage.
     const leaderMargin = stage.gc && stage.number > 1 ? [...stage.gc.values()].sort((a, b) => a - b)[1] ?? 0 : 0;
-    const pLetGo = 0.24 + 0.12 * (week - 1) + (route.finish === 'summit' ? -0.12 : 0.06) + (stage.number <= 3 ? -0.2 : 0) + (leaderMargin > 180 ? 0.15 : 0);
+    const pLetGo = 0.24 + 0.12 * (week - 1) + (route.finish === 'summit' ? -0.04 : 0.06) + (mountainStage ? 0.08 : 0) + (stage.number <= 3 ? -0.2 : 0) + (leaderMargin > 180 ? 0.15 : 0);
     letGo = random() < pLetGo;
     if (letGo) { maxGap = 240 + random() * 480; plannedCatchKm = distance * 4; }
-    threat = stage.gc && stage.number > 1 ? [...breakaway].filter((r) => gcGap(r) != null && gcRank(r) <= 25).sort((a, b) => gcGap(a) - gcGap(b))[0] || null : null;
+    threat = stage.gc && stage.number > 1 ? [...breakaway].filter((r) => gcGap(r) != null && (gcRank(r) <= 25 || gcGap(r) <= 300)).sort((a, b) => gcGap(a) - gcGap(b))[0] || null : null;
     if (threat && gcGap(threat) < maxGap + 60) {
       threatActive = true;
       // The leader's team (helped by the other GC teams) decides how much rope to give a
@@ -199,7 +208,13 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
       // last week a tired team with few domestiques can lose the race to a long-range move.
       const leaderTeam = riders.find((r) => gcRank(r) === 1)?.team?.id, domestiques = riders.filter((r) => r.team?.id === leaderTeam).length - 1;
       const control = clamp(0.82 + domestiques * 0.025 - (week - 1) * 0.12 - (gcGap(threat) > 480 ? 0.15 : 0), 0.4, 0.97);
-      controlled = random() < control;
+      // Early in the race a GC leader's team happily hands the jersey to a breakaway rider who is
+      // no threat in the mountains: someone else has to defend it for a few days.
+      const leaderRider = riders.find((r) => gcRank(r) === 1);
+      const harmless = leaderRider && threat.p.climb < leaderRider.p.climb - 3 && contenders.has(leaderRider.id);
+      giveAway = harmless && route.type !== 'mountain' && stage.number >= 2 && stage.number <= 16 && gcGap(threat) <= 600 && random() < 0.8;
+      controlled = giveAway ? false : random() < control;
+      if (giveAway) { letGo = true; maxGap = Math.max(maxGap, gcGap(threat) + 50 + random() * 240); plannedCatchKm = distance * 4; }
       if (controlled) maxGap = Math.max(60, gcGap(threat) - 30 - random() * 60);
       else maxGap = Math.min(maxGap, gcGap(threat) + 30 + random() * 270);
     }
@@ -362,7 +377,7 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
           const front = inGroup('front').map(sc).sort((a, b) => b - a), frontPace = front[Math.min(3, front.length - 1)] ?? 0;
           const breakPace = ordered.slice(0, 2).reduce((s, r) => s + sc(r), 0) / Math.min(2, ordered.length);
           // With minutes in hand the favourites race each other rather than the break.
-          breakGap -= clamp(frontPace - breakPace, -12, 25) * d * 0.5 * intensity * (breakGap > 120 ? 0.4 : 1);
+          breakGap -= clamp(frontPace - breakPace, -12, 25) * d * 0.5 * intensity * (breakGap > 120 ? 0.4 : 1) * (giveAway ? 0.3 : 1);
           if (breakGap <= 0) catchBreak(km);
         }
       }
@@ -389,14 +404,15 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
       if (leadAlive) {
         const lead = inGroup('lead');
         if (lead.length > 1) {
-          const ordered = [...lead].sort((a, b) => sc(b) - sc(a)), best = sc(ordered[0]), tol = (32 - 2.7 * d) * 0.45;
-          const shed = ordered.filter((r, i) => i > 0 && sc(r) < best - tol);
+          // A comfortable race leader sits on in the group; he does not ride his companions off his wheel.
+          const ordered = [...lead].sort((a, b) => sc(b) - sc(a)), pacer = ordered.find((r) => r !== comfortableLeader) || ordered[0], best = sc(pacer), tol = (32 - 2.7 * d) * 0.45;
+          const shed = ordered.filter((r) => r !== pacer && r !== comfortableLeader && sc(r) < best - tol);
           for (const r of shed) r.status = 'front';
           if (shed.length) log(km, 'drop', `${nameList(shed)} cannot hold the wheel on ${sector.name} and drift${shed.length === 1 ? 's' : ''} back.`, shed, { sector: sector.name });
         }
         const leadNow = inGroup('lead'), chasers = inGroup('front').map(sc).sort((a, b) => b - a);
         if (leadNow.length && chasers.length) {
-          const leadPace = Math.max(...leadNow.map(sc)), chasePace = chasers.slice(0, 2).reduce((s, v) => s + v, 0) / Math.min(2, chasers.length);
+          const leadPace = Math.max(...leadNow.map((r) => comfortableLeader === r && leadNow.length > 1 ? Math.min(sc(r), Math.max(...leadNow.filter((x) => x !== r).map(sc))) : sc(r))), chasePace = chasers.slice(0, 2).reduce((s, v) => s + v, 0) / Math.min(2, chasers.length);
           leadGap += clamp(leadPace - chasePace, -12, 12) * d * (stage && sector.type === 'climb' && (sector.length || 0) >= 4 ? 0.7 : 0.55) * intensity;
           if (leadGap <= 0) catchLead(km);
         } else if (!leadNow.length) leadAlive = false;
@@ -410,14 +426,14 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
           const sprinterType = r.rider.terrain === 'sprinter';
           const gcBonus = stage?.gc && marked.has(r.id) && mountainStage ? 0.12 : 0;
           // A leader with minutes in hand rides defensively and lets others fight for the stage.
-          const comfortable = stage?.gc && gcRank(r) === 1 && ([...stage.gc.values()].sort((a, b) => a - b)[1] ?? 0) > 180 ? 0.18 : 0;
+          const comfortable = comfortableLeader === r ? 0.3 : 0;
           const domestique = stage && !isLeader(r) && riders.find((l) => l.id === leaderOf.get(teamIdOf(r)))?.status === 'front' && marked.has(leaderOf.get(teamIdOf(r)));
-          const chance = 0.13 + (d >= 7 ? 0.12 : 0) + (lastBig ? 0.25 : 0) + (sprinterFinish && !sprinterType ? 0.1 : 0) - (sprinterFinish && sprinterType ? 0.25 : 0) + (favorites.has(r.id) ? 0.06 : 0.04) + gcBonus - comfortable - (domestique ? 0.2 : 0);
-          return random() < chance;
+          const chance = 0.13 + (d >= 7 ? 0.12 : 0) + (lastBig ? 0.25 : 0) + (sprinterFinish && !sprinterType ? 0.1 : 0) - (sprinterFinish && sprinterType ? 0.25 : 0) + (favorites.has(r.id) ? 0.06 : 0.04) + gcBonus - comfortable - (domestique ? 0.2 : 0) - ((stage?.stageWins?.get(r.id) || 0) >= 3 ? 0.15 : 0);
+          return comfortableLeader !== r && random() < chance;
         });
         const attacker = candidates[0];
         if (attacker) {
-          const outsider = !favorites.has(attacker.id), aScore = sc(attacker), followTol = 2 + (10 - d) * 0.45 + (marked.has(attacker.id) ? 2.5 : 0) - (outsider ? 1.5 : 0);
+          const outsider = !favorites.has(attacker.id), aScore = sc(attacker), followTol = 2 + (10 - d) * 0.45 + (marked.has(attacker.id) ? 2.5 : 0) - (outsider ? 1.5 : 0) + (stage && !mountainStage && contenders.has(attacker.id) ? 3 : 0);
           const followers = [attacker, ...attackField.filter((r) => r !== attacker && sc(r) >= aScore - followTol)];
           const rest = attackField.filter((r) => !followers.includes(r));
           const bestRest = rest.length ? Math.max(...rest.map(sc)) : aScore;
@@ -462,13 +478,27 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
   const finishGroup = (list, base, kind) => {
     if (!list.length) return [];
     const bigGroup = list.length >= 10 && ['small-group', 'descent', 'reduced-sprint'].includes(route.finish);
-    const mix = kind === 'front' && bigGroup ? GROUP_SPRINT_MIX : finishMix, spread = kind === 'front' && bigGroup ? 0 : (FINISH_SPREAD[route.finish] ?? 0.12) * (stage && route.finish === 'summit' ? 1.35 : 1);
+    const mix = kind === 'front' && bigGroup ? GROUP_SPRINT_MIX : finishMix, spread = kind === 'front' && bigGroup ? 0 : (FINISH_SPREAD[route.finish] ?? 0.12);
     const sprinting = 'sprint' in mix && mix.sprint >= 0.5;
     // Lead-outs: a sprinter delivered by team-mates in the final kilometre.
     const leadOut = (r) => (sprinting && isSprinter(r) ? Math.min(3, list.filter((t) => t !== r && teamIdOf(t) === teamIdOf(r) && t.p.flat >= r.p.flat - 15).length) * 1.1 : 0);
     // Bunch sprints are chaotic: a rider can be boxed in or lose the wheel at the decisive moment.
-    const boxed = new Set(sprinting && list.length >= 10 ? list.filter(() => random() < 0.28).map((r) => r.id) : []);
-    let ordered = list.map((r) => ({ r, s: score(r, mix, sprinting && list.length >= 10 ? 12 : 8) + leadOut(r) - (boxed.has(r.id) ? 5 + random() * 6 : 0), lo: leadOut(r) })).sort((a, b) => b.s - a.s);
+    const wins = (r) => stage?.stageWins?.get(r.id) || 0;
+    const boxed = new Set(sprinting && list.length >= 10 ? list.filter((r) => random() < 0.28 + Math.min(0.25, wins(r) * 0.07)).map((r) => r.id) : []);
+    // In a stage-race bunch sprint the top sprinters are separated by inches: an edge in raw speed
+    // over the third-fastest man counts for less than position, timing and the lead-out.
+    const bunchSprint = stage && sprinting && list.length >= 10;
+    const raw = bunchSprint ? list.map((r) => score(r, mix)).sort((a, b) => b - a) : [];
+    const edge = (r) => { if (!bunchSprint) return 0; const s0 = score(r, mix), third = raw[Math.min(2, raw.length - 1)]; return s0 > third ? -(s0 - third) * 0.6 : 0; };
+    // GC men stay out of bunch sprints: they finish safely in the wheels.
+    const staysSafe = (r) => bunchSprint && contenders.has(r.id) && r.rider.terrain !== 'sprinter' ? 15 : 0;
+    let ordered = list.map((r) => ({ r, s: edge(r) - staysSafe(r) + score(r, mix, sprinting && list.length >= 10 ? (stage ? 20 : 12) : 8) + leadOut(r) - (boxed.has(r.id) ? 5 + random() * 6 : 0) - (sprinting ? wins(r) * 1.8 : 0), lo: leadOut(r) })).sort((a, b) => b.s - a.s);
+    // A race leader with a comfortable margin rides defensively: he follows his rivals' wheels
+    // to the line instead of attacking them, so he neither wins the stage nor gains time.
+    if (comfortableLeader && kind !== 'break') {
+      const entry = ordered.find((x) => x.r.id === comfortableLeader.id), others = ordered.filter((x) => x !== entry);
+      if (entry && others.length && !sprinting) { entry.s = Math.min(entry.s, others[0].s - 0.5 - random() * 2); ordered.sort((a, b) => b.s - a.s); }
+    }
     // Crash in the final kilometre of a bunch sprint: the fallers lose the sprint (in a stage race
     // they keep the group's time under the 3 km rule).
     if (kind === 'front' && sprinting && list.length >= 20 && random() < 0.1) {
@@ -490,7 +520,16 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
     ...finishGroup(inGroup('front'), 0, 'front')
   ];
   const dropped = inGroup('dropped').map((r) => ({ r, time: Math.round((r.lost + (distance - (r.dropKm ?? distance)) * 0.35) / 5) * 5 })).sort((a, b) => a.time - b.time);
-  const all = [...finishers, ...dropped].map((entry, index) => ({ ...entry, index })).sort((a, b) => a.time - b.time || a.index - b.index);
+  const all = [...finishers, ...dropped].map((entry, index) => ({ ...entry, index }));
+  // On hilly and flat days the GC men ride in their teams' protection: a contender caught out
+  // limits the damage, so the general classification is decided in the mountains, the time
+  // trials and the cobbles rather than on every bump of the first week.
+  if (stage?.gc && ['hilly', 'flat'].includes(route.type)) {
+    const cs = all.filter((e) => contenders.has(e.r.id) && !e.r.crisis);
+    const best = Math.min(...cs.map((e) => e.time));
+    for (const e of cs) if (e.time > best) e.time = Math.round(best + (e.time - best) * 0.4);
+  }
+  all.sort((a, b) => a.time - b.time || a.index - b.index);
   const base = all[0].time;
   const order = all.map(({ r, time }) => ({ rider: r.rider, team: r.team, time: time - base }));
 

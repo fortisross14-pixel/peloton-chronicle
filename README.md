@@ -271,3 +271,44 @@ Existing older universes are upgraded when opened. A new universe is still recom
 - Complete typography, spacing, link-state, card, table and mobile consistency audit.
 - The visual system remains an old European cycling almanac: cream stock, burgundy ink, brass accents and editorial serif display type.
 - See `QA_BALANCE_v1.0.md` for the final fixed-seed benchmark.
+
+## v2.1 — Fame, prestige ladder, Olympics, old-save upgrade
+
+- **Prestige ladder:** Tour 100 · Olympic road race 95 · Worlds 93 · Giro 92 · Vuelta 90 · Olympic TT 88 · Worlds TT 86 · monuments 87–89 · great classics 80–85 · rest of the WorldTour 70–80 · ProSeries, U23 and continental under 70.
+- **Fame** (shown on rider pages and used by the Hall of Fame): every top-10 finish earns a share of the race's win value, which doubles every 5 prestige points (Tour win 10,000; Olympic gold 5,000; Worlds 3,800; Giro 3,300; Vuelta 2,500; a monument about 2,000; a classic about 900). Second place is worth 30%, third 18%. Grand Tour stages and jerseys count too. So: two Tours > three seconds and four thirds in the Tour > two monuments > six seconds in classics.
+- **Olympic Games** every four years (2028 Los Angeles, 2032 Brisbane, …): road race and time trial with small national squads; shown with the Worlds showcase setting.
+- **Old saves** (v19 and earlier) keep every rider, team and result, and on load are brought onto the current balance: new prestige values, the Olympics added to the calendar, fame rebuilt from the full race history, and the elite tiers rebalanced so each has enough Grand Tour riders (the best young climbers or all-rounders of the tier below step up; surplus older specialists step down; nobody changes team). A news item lists the rating changes.
+- New elite prospects are steered toward climbers and all-rounders when a tier is short of stage racers.
+
+## v2.0 — Grand Tour balance pass
+
+Checked with `node scripts/gt-checklist.mjs "" <seeds> <seasons>` (162 Grand Tours, 9 worlds × 6 seasons):
+
+| Check | Before | After |
+|---|---|---|
+| Most stage wins by one rider (median / max) | 5 / 12 | 3 / 5 |
+| Stage wins by the GC winner (median) | 5 | 2 |
+| Different stage winners per GT (median) | 12 | 16 |
+| Winner leads from stage ≤4 to the end | 31% | 15% |
+| Leader changes per GT (median) | 3 | 4 |
+| Bunch sprints won by a GC top-10 rider | 32% (all flat stages) | 1% |
+| Same rider wins flat, mountain and TT stages in one GT | 9% | 1% |
+| GT won by a climber or all-rounder | 70% | 96% |
+| Median / 90th pct winning margin | 3:18 / 8:52 | 2:19 / 6:44 |
+
+- Riders keep their speciality on race day: terrain offsets stop a great puncheur or sprinter from out-climbing the climbers or a GC man from winning bunch sprints.
+- Bunch sprints are closer and more chaotic; GC men stay out of them; riders who keep winning get marked; sprinters can miss the time cut in the mountains.
+- GC contenders lose little on flat and hilly days; the race is decided in the mountains, time trials and on the cobbles.
+- A race leader with a big lead, or already three stage wins, rides defensively and gifts stages.
+- Early in the race a leader's team hands the jersey to a harmless breakaway rider; riders a few minutes down hunt for it.
+- More bad days in the third week; each rider brings a race-long form level.
+- Back-to-back winners of the same race carry extra pressure, and multiple winners look for a different Grand Tour.
+- Key stages: the playback now stops only before the 3–4 stages where something happens (new leader, big time gains, podium shake-up), picked from the already-simulated race.
+- The live stage popup has "← Back to the race" at any time; the stage keeps running in a banner on the race screen and rolls on when it ends.
+
+## v1.9.3 — Live stages in a popup
+
+- The stage-race screen stays on the GC, jerseys and stage winners. A key stage watched live opens in a popup over it, with the route, groups, GC badges, ★ virtual leader and race radio.
+- When the stage ends the popup shows the stage result and the new top five, and waits until you close it to go back to the race.
+- The final screen leads with the race name and year in large type above the winner.
+

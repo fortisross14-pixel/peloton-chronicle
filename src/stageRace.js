@@ -27,7 +27,7 @@ export function simulateStageRace({ participants, random, power, plan, detail = 
   // Race-day strengths are fixed for the race; daily form, fatigue and tactics vary.
   const base = participants.map(({ rider, team }) => {
     const p = {}; for (const profile of ['flat', 'hill', 'climb', 'cobbles', 'cobbledClimb', 'gravel', 'sprint', 'punch', 'descend', 'tt']) p[profile] = power(rider, profile, team);
-    return { rider, team, id: rider.id, p, recovery: rider.skills?.recovery ?? 70, endurance: rider.skills?.endurance ?? 70 };
+    return { rider, team, id: rider.id, p, form: (random() + random() + random() - 1.5) * 4, recovery: rider.skills?.recovery ?? 70, endurance: rider.skills?.endurance ?? 70 };
   });
   const byId = new Map(base.map((b) => [b.id, b]));
   const gc = new Map(base.map((b) => [b.id, 0])), placeSum = new Map(base.map((b) => [b.id, 0]));
@@ -64,9 +64,9 @@ export function simulateStageRace({ participants, random, power, plan, detail = 
     const week = total >= 15 ? (stage.number <= 9 ? 1 : stage.number <= 15 ? 2 : 3) : 1 + Math.floor((3 * (stage.number - 1)) / total);
     // Bad days: more likely late in a long race and for tired riders.
     const badDay = new Map();
-    for (const b of base) { if (!active.has(b.id)) continue; const chance = 0.006 + (week === 3 ? 0.012 : 0) + (carry.get(b.id) || 0) / 600; if (random() < chance) badDay.set(b.id, 4 + random() * 7); }
+    for (const b of base) { if (!active.has(b.id)) continue; const chance = 0.006 + (week === 3 ? 0.02 : week === 2 ? 0.006 : 0) + ((gcRank.get(b.id) ?? 99) <= 5 && week >= 2 ? (week === 3 ? 0.03 : 0.012) : 0) + (carry.get(b.id) || 0) / 600; if (random() < chance) badDay.set(b.id, 4 + random() * 7); }
     for (const [id, size] of sickToday) badDay.set(id, Math.max(badDay.get(id) || 0, size));
-    const riders = base.filter((b) => active.has(b.id)).map((b) => ({ rider: b.rider, team: b.team, id: b.id, p: b.p, day: (random() - 0.5) * 10, wear: carry.get(b.id), startWear: carry.get(b.id), status: 'front', lost: 0, endurance: b.endurance }));
+    const riders = base.filter((b) => active.has(b.id)).map((b) => ({ rider: b.rider, team: b.team, id: b.id, p: b.p, day: b.form + (random() - 0.5) * 14, wear: carry.get(b.id), startWear: carry.get(b.id), status: 'front', lost: 0, endurance: b.endurance }));
     for (const [teamId, leaderId] of leaders) {
       // A leader who has left the race is replaced by the strongest team-mate still racing.
       if (!active.has(leaderId)) { const next = base.filter((b) => (b.team?.id || b.id) === teamId && active.has(b.id)).sort((a, b) => (gcGap.get(a.id) ?? 1e9) - (gcGap.get(b.id) ?? 1e9) || strength(b) - strength(a))[0]; if (next) leaders.set(teamId, next.id); else leaders.delete(teamId); continue; }
@@ -111,6 +111,14 @@ export function simulateStageRace({ participants, random, power, plan, detail = 
       carry.set(b.id, next);
     }
 
+    // Sprinters suffer in the high mountains: some miss the time cut or climb off to save
+    // themselves for the next goal.
+    const quitters = [];
+    if (stage.type === 'mountain' && total >= 15 && stage.number >= 8) {
+      const pointsLeader = leaderOf(points);
+      for (const id of [...active]) { const b = byId.get(id); if (b.rider.terrain !== 'sprinter') continue; if (random() < (id === pointsLeader ? 0.02 : 0.06)) quitters.push(id); }
+      for (const id of quitters) leave(id, stage.number, 'abandon', random() < 0.5 ? 'outside the time limit' : 'climbed off in the mountains');
+    }
     const after = gcOrder(), afterLeader = after[0][1];
     const youngId = after.find(([id]) => byId.get(id).rider.age <= YOUTH_AGE)?.[0] || null;
     const top10 = after.slice(0, 10).map(([id, t], i) => ({ rank: i + 1, riderId: id, name: byId.get(id).rider.name, teamId: byId.get(id).rider.teamId, gap: t - afterLeader }));
@@ -121,6 +129,7 @@ export function simulateStageRace({ participants, random, power, plan, detail = 
     const previousLeader = leaderBefore || order[0][0], newLeader = after[0][0];
     const raceDetail = { ...out.race, timeline: [...out.race.timeline] };
     if (!detail) delete raceDetail.snapshots;
+    if (quitters.length) raceDetail.timeline.push({ km: stage.distance, kind: 'abandon', text: `${quitters.map((id) => byId.get(id).rider.name).join(', ')} ${quitters.length === 1 ? 'is' : 'are'} out of the race: the mountains were too much for the sprinter${quitters.length === 1 ? '' : 's'}.`, riderIds: quitters });
     if (nonStarters.length) raceDetail.timeline.unshift({ km: 0, kind: 'abandon', text: `${nonStarters.map((id) => byId.get(id).rider.name).join(', ')} ${nonStarters.length === 1 ? 'does' : 'do'} not start: illness.`, riderIds: nonStarters });
     if (stage.number > 1 && previousLeader !== newLeader && !active.has(previousLeader)) raceDetail.timeline.push({ km: stage.distance, kind: 'jersey', text: `${byId.get(previousLeader).rider.name}, the race leader, has abandoned — ${byId.get(newLeader).rider.name} inherits the jersey.`, riderIds: [newLeader, previousLeader] });
     else if (stage.number > 1 && previousLeader !== newLeader) raceDetail.timeline.push({ km: stage.distance, kind: 'jersey', text: `${byId.get(newLeader).rider.name} takes the leader's jersey from ${byId.get(previousLeader).rider.name}${after[1] ? ` and leads by ${formatRaceGap(after[1][1] - afterLeader)}` : ''}.`, riderIds: [newLeader, previousLeader] });

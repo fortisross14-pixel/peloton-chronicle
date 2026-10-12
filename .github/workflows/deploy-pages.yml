@@ -29,6 +29,8 @@ jobs:
       - run: npm run test:v17
       - run: npm run test:long
       - run: npm run test:race-balance
+      - run: npm run test:gt-dynasty
+      - run: npm run test:v20
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

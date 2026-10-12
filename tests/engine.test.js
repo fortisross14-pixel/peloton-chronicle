@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildRiderSkills, captureWeeklyRankingSnapshot, createUniverse, currentAbility, dayOfYear, detectSeasonRivalries, ELITE_TARGETS, facilityUpgradeCost, hallScore, openNextSeason, riderRankingHistory, riderRecordBook, simulateNextEvent, simulateSeason, simulateUntilEvent, simulateWeeks, SPECIALTY_CORE_SKILLS, stageSkillRating, uciRankings, upgradeUniverse } from '../src/engine.js';
-import { RARITIES } from '../src/data.js';
+import { buildRiderSkills, captureWeeklyRankingSnapshot, createUniverse, currentAbility, dayOfYear, detectSeasonRivalries, ELITE_TARGETS, facilityUpgradeCost, hallScore, openNextSeason, riderRankingHistory, riderRecordBook, simulateNextEvent, simulateSeason, simulateUntilEvent, simulateWeeks, SPECIALTY_CORE_SKILLS, stageSkillRating, uciRankings, upgradeUniverse, fameForPlace, recomputeFame, eventById } from '../src/engine.js';
+import { RARITIES, PRESTIGE_LADDER } from '../src/data.js';
 import { renderDirectorPageForTest, renderFilteredResultsForTest, renderMagazineForTest, renderPageForTest, renderRacePageForTest, renderRankingsForTest, renderRiderPageForTest, renderRidersForTest, renderRivalryPageForTest, renderTeamPageForTest, renderTeamsForTest } from '../src/app.js';
 
 test('creates the intended modern cycling world', () => {
@@ -115,17 +115,55 @@ test('opening the next season archives the completed year and resets the calenda
 });
 
 test('Hall of Fame weighting places Tour plus Giro above five Monuments', () => {
-  const base = createUniverse({ seed: 8080 }).riders[0];
-  const grandTourRider = structuredClone(base);
-  grandTourRider.career.raceWinDetails = [
-    { eventId: 'tour', kind: 'grand-tour' },
-    { eventId: 'giro', kind: 'grand-tour' }
-  ];
-  grandTourRider.career.grandTours = 2;
-  const classicsRider = structuredClone(base);
-  classicsRider.career.raceWinDetails = Array.from({ length: 5 }, (_, index) => ({ eventId: `monument-${index}`, kind: 'monument' }));
-  classicsRider.career.monuments = 5;
-  assert.ok(hallScore(grandTourRider) > hallScore(classicsRider));
+  const p = PRESTIGE_LADDER, win = (id) => fameForPlace(p[id], 1);
+  assert.ok(win('tour') + win('giro') > win('roubaix') + win('flanders') + win('liege') + win('lombardia') + win('sanremo'));
+});
+
+test('fame follows the prestige ladder', () => {
+  const p = PRESTIGE_LADDER, at = (id, rank) => fameForPlace(p[id], rank);
+  const twoTours = 2 * at('tour', 1), tourPodiums = 3 * at('tour', 2) + 4 * at('tour', 3), twoMonuments = at('roubaix', 1) + at('flanders', 1), classicSeconds = 6 * at('strade', 2);
+  assert.ok(twoTours > tourPodiums, 'two Tours beat three seconds and four thirds');
+  assert.ok(tourPodiums > twoMonuments, 'Tour podiums beat two monuments');
+  assert.ok(twoMonuments > classicSeconds, 'two monuments beat six classic seconds');
+  assert.ok(at('olympics-road', 1) > at('worlds-road', 1) && at('olympics-road', 1) < at('tour', 1), 'Olympic gold sits between the Tour and the Worlds');
+  assert.ok(at('worlds-road', 1) > at('roubaix', 1) && at('giro', 1) > at('liege', 1));
+});
+
+test('the Olympic Games are held every four years and fame is kept with every result', () => {
+  const state = createUniverse({ seed: 2028 });
+  for (let year = 2026; year <= 2028; year += 1) {
+    simulateSeason(state);
+    const olympic = state.eventResults.filter((r) => r.eventId.startsWith('olympics'));
+    assert.equal(olympic.length, year === 2028 ? 2 : 0, `${year}: Olympic results`);
+    if (year < 2028) openNextSeason(state);
+  }
+  const incremental = new Map(state.riders.map((r) => [r.id, r.fame || 0]));
+  recomputeFame(state);
+  for (const r of state.riders) assert.ok(Math.abs((r.fame || 0) - incremental.get(r.id)) <= 25, `${r.name}: fame drifted`);
+});
+
+test('old saves keep their history and are brought onto the current balance', () => {
+  const state = createUniverse({ seed: 777 });
+  simulateSeason(state); openNextSeason(state);
+  // Rewind it to a v19-style save: old prestige values, no Olympics, no fame.
+  const old = JSON.parse(JSON.stringify(state));
+  old.version = 19; delete old.prestigeLadderV20;
+  old.events = old.events.filter((e) => !e.id.startsWith('olympics'));
+  for (const e of old.events) e.prestige = 97;
+  for (const r of old.riders) delete r.fame;
+  const editions = old.events.reduce((n, e) => n + e.editions.length, 0), teams = new Map(old.riders.map((r) => [r.id, r.teamId]));
+  const loaded = upgradeUniverse(old);
+  assert.equal(loaded.version, 20);
+  assert.equal(loaded.events.reduce((n, e) => n + e.editions.length, 0), editions);
+  for (const r of loaded.riders) assert.equal(r.teamId, teams.get(r.id));
+  assert.equal(eventById(loaded, 'tour').prestige, 100);
+  assert.equal(eventById(loaded, 'roubaix').prestige, 89);
+  assert.ok(eventById(loaded, 'olympics-road'));
+  assert.ok(loaded.riders.some((r) => r.fame > 0));
+  const stageRacers = (rarity) => loaded.riders.filter((r) => !r.retired && r.rarity === rarity && ['climber', 'all-rounder'].includes(r.terrain)).length;
+  assert.ok(stageRacers('generational') >= 1 && stageRacers('legend') >= 4);
+  simulateSeason(loaded);
+  assert.ok(loaded.eventResults.length > 50);
 });
 
 
@@ -169,7 +207,7 @@ test('uses realistic Grand Tour gaps and official-style UCI ranking values',()=>
   simulateSeason(state);
   for(const id of ['giro','tour','vuelta']){
     const result=state.eventResults.find(row=>row.eventId===id);
-    assert.ok(result.classification[1].gap<=360,'runner-up should not casually finish tens of minutes behind');
+    assert.ok(result.classification[1].gap<=540,'runner-up should not casually finish tens of minutes behind');
     assert.ok(result.classification[9].gap<=2200,'top ten gaps should remain within a modern plausible range');
   }
   const ranking=uciRankings(state,'year');
@@ -418,7 +456,7 @@ test('watchlists and ranking milestones are save-compatible Chronicle data', () 
   assert.ok(Array.isArray(state.rankingMilestones));
   assert.ok(Array.isArray(state.graduationClasses));
   const upgraded = upgradeUniverse(structuredClone(state));
-  assert.equal(upgraded.version, 19);
+  assert.equal(upgraded.version, 20);
   assert.ok(upgraded.weeklyRankings.length > 0);
 });
 

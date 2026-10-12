@@ -16,7 +16,9 @@
     "test:core-a": "node --test --test-concurrency=1 --test-reporter=spec --test-name-pattern=\"^(creates|advances|simulates|results|renders navigation|end of year|opening the next|Hall|repairs|renders full)\" tests/engine.test.js",
     "test:core-b": "node --test --test-concurrency=1 --test-reporter=spec --test-name-pattern=\"^(uses realistic|career plans|facility|rider and team|rarity|specialists|deterministic|v1.2|rider overview|UCI rankings|consecutive number)\" tests/engine.test.js",
     "test:v17": "node --test --test-concurrency=1 --test-reporter=spec --test-name-pattern=\"^(race dossiers|showcase simulation|official rivalries|statistics absorbs)\" tests/engine.test.js",
-    "test:race-balance": "node --test --test-concurrency=1 --test-reporter=spec tests/race-balance.test.js"
+    "test:race-balance": "node --test --test-concurrency=1 --test-reporter=spec tests/race-balance.test.js",
+    "test:gt-dynasty": "node --test --test-concurrency=1 --test-reporter=spec tests/gt-dynasty.test.js",
+    "test:v20": "node --test --test-concurrency=1 --test-reporter=spec --test-name-pattern=\"^(fame follows|the Olympic Games|old saves keep)\" tests/engine.test.js"
   },
   "dependencies": {
     "react": "^19.1.0",

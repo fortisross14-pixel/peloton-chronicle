@@ -202,6 +202,8 @@ export const BASE_EVENTS = [
   event('worlds-tt','World Championships – Time Trial','national',9,23,'championship','WORLD',96,'tt',1),
   event('worlds-road','World Championships – Road Race','national',9,27,'championship','WORLD',99,'punch',1),
   event('lombardia','Il Lombardia','worldtour',10,10,'monument','EUR',97,'climb',1),
+  event('olympics-tt','Olympic Games – Time Trial','national',7,31,'championship','WORLD',88,'tt',1),
+  event('olympics-road','Olympic Games – Road Race','national',8,2,'championship','WORLD',95,'punch',1),
   event('guangxi','Tour of Guangxi','worldtour',10,13,'stage','ASI',76,'week',6),
 
   event('valenciana','Volta a la Comunitat Valenciana','proseries',2,4,'stage','EUR',66,'week',5),
@@ -248,6 +250,29 @@ const EVENT_COUNTRIES = {
   avenir:'FR','giro-next':'IT','u23-flanders':'BE',peace:'CZ',isard:'FR','u23-worlds-tt':'WORLD','u23-worlds-road':'WORLD','rw-tour':'RW',colombia:'CO',japan:'JP',qinghai:'CN',utah:'US',cape:'ZA',nz:'NZ',portugal:'PT'
 };
 for (const race of BASE_EVENTS) race.country = EVENT_COUNTRIES[race.id] || 'WORLD';
+
+// The prestige ladder. Prestige drives fame, news, targeting and the calendar's pecking order:
+// the Tour stands alone; the Olympic road race comes next (every four years); then the World
+// Championships, Giro and Vuelta; the monuments and great classics; the rest of the WorldTour;
+// and everything else below 70.
+export const PRESTIGE_LADDER = {
+  tour:100, 'olympics-road':95, 'worlds-road':93, giro:92, vuelta:90, 'olympics-tt':88, 'worlds-tt':86,
+  roubaix:89, flanders:89, liege:88, lombardia:88, sanremo:87,
+  strade:85, amstel:83, e3:82, gent:82, fleche:82, 'san-sebastian':81, montreal:81, omloop:80, quebec:80, dwars:80,
+  'paris-nice':80, dauphine:80, tirreno:79, catalunya:78, suisse:78, itzulia:78, romandie:76, bretagne:76,
+  'uae-tour':74, pologne:74, cyclassics:74, eschborn:73, tdu:72, renewi:72, 'sprint-classic':72, copenhagen:71, guangxi:70, cadel:70,
+  alps:69, burgos:68, brabant:68, britain:66, kuurne:66, 'paris-tours':66, algarve:65, piemonte:65, belgium:64, slovenia:63,
+  valenciana:62, turkey:61, dunkirk:61, nokere:60, norway:60, denmark:60, wallonie:60, arctic:59, asturias:57,
+  avenir:68, 'u23-worlds-road':66, 'giro-next':64, 'u23-worlds-tt':62, 'u23-flanders':58, peace:56, isard:55
+};
+// Ceiling by tier for races outside the ladder (or promoted later).
+export const TIER_PRESTIGE_CAP = { worldtour:80, proseries:69, continental:60, u23:68, national:95 };
+for (const race of BASE_EVENTS) { if (PRESTIGE_LADDER[race.id] != null) race.prestige = race.basePrestige = PRESTIGE_LADDER[race.id]; }
+// The Olympic Games come round every four years, in a different host country.
+export const OLYMPIC_EVENT_IDS = ['olympics-tt', 'olympics-road'];
+const OLYMPIC_HOSTS = { 2028:'US', 2032:'AU', 2036:'QA', 2040:'DE', 2044:'ES', 2048:'JP', 2052:'GB', 2056:'IT' };
+export function olympicYear(year) { return year % 4 === 0; }
+export function olympicHost(year) { return OLYMPIC_HOSTS[year] || ['FR','NL','CO','BE','DK','CH','KR','CA'][Math.floor(year / 4) % 8]; }
 
 export const TERRAIN_TYPES = ['climber','sprinter','puncheur','rouleur','time-trialist','cobbles','all-rounder'];
 export const PROGRAM_TYPES = ['grand-tour','one-week','monuments','stage-hunter'];

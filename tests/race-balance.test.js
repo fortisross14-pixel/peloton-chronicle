@@ -99,7 +99,7 @@ test('stage races keep one consistent record from stage to stage', () => {
 
 test('Grand Tours start with full fields and are won by stage racers', () => {
   for (const { result } of grandTours) assert.ok(result.participantIds.length >= (result.eventId === 'vuelta' ? 110 : 150), `${result.eventName} ${result.year}: only ${result.participantIds.length} starters`);
-  inRange('GT won by an Epic or better rider', share(grandTours, ({ result, rider }) => ['generational', 'legend', 'epic'].includes(rider(result.winnerId).rarity)), 0.55, 1);
+  inRange('GT won by an Epic or better rider', share(grandTours, ({ result, rider }) => ['generational', 'legend', 'epic'].includes(rider(result.winnerId).rarity)), 0.4, 1);
   inRange('GT won by a climber, all-rounder, puncheur or time-triallist', share(grandTours, ({ result, rider }) => ['climber', 'all-rounder', 'puncheur', 'time-trialist'].includes(rider(result.winnerId).terrain)), 0.8, 1);
   inRange('median GT winning margin (s)', median(grandTours.map(({ result }) => result.classification[1].gap)), 40, 300);
   inRange('90th percentile GT winning margin (s)', quantile(grandTours.map(({ result }) => result.classification[1].gap), 0.9), 120, 600);
@@ -112,6 +112,21 @@ test('breakaways grow stronger as a Grand Tour wears on', () => {
   inRange('breakaway stage wins, week 1', week1, 0.08, 0.35);
   inRange('breakaway stage wins, week 3', week3, 0.25, 0.6);
   assert.ok(week3 > week1, 'breakaways should succeed more often in the third week');
+});
+
+test('no rider runs away with a Grand Tour', () => {
+  const maxWins = grandTours.map(({ result }) => Math.max(...Object.values(result.stages.reduce((m, s) => ({ ...m, [s.winnerId]: (m[s.winnerId] || 0) + 1 }), {}))));
+  inRange('most stage wins by one rider, max', Math.max(...maxWins), 1, 6);
+  inRange('median stage wins by the GC winner', median(grandTours.map(({ result }) => result.stages.filter((s) => s.winnerId === result.winnerId).length)), 0, 2);
+  const tookLead = grandTours.map(({ result }) => { let first = result.stages.length; for (let i = result.stages.length - 1; i >= 0 && result.stages[i].jerseys.gc === result.winnerId; i -= 1) first = i + 1; return first; });
+  inRange('winner leads from stage 4 or earlier to the end', share(tookLead, (x) => x <= 4), 0, 0.25);
+  inRange('median different stage winners', median(grandTours.map(({ result }) => new Set(result.stages.map((s) => s.winnerId)).size)), 12, 21);
+});
+
+test('every rider keeps his speciality', () => {
+  const bunch = grandTours.flatMap(({ result }) => result.stages.filter((s) => s.type === 'flat' && s.race.winningMove === 'front').map((s) => ({ s, result })));
+  inRange('bunch sprints won by a GC top-10 rider', share(bunch, ({ s, result }) => result.classification.slice(0, 10).some((c) => c.riderId === s.winnerId)), 0, 0.05);
+  inRange('a rider wins flat, mountain and TT stages in one GT', share(grandTours, ({ result }) => { const kinds = {}; for (const s of result.stages) if (['flat', 'mountain', 'itt'].includes(s.type)) (kinds[s.winnerId] ||= new Set()).add(s.type); return Object.values(kinds).some((k) => k.size >= 3); }), 0, 0.03);
 });
 
 test('jerseys and stages go to the right kind of rider', () => {

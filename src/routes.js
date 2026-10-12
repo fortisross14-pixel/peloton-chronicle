@@ -50,6 +50,11 @@ const ROUTES = {
     climb(80, 'Circuit climb (lap 2)', 3), climb(110, 'Circuit climb (lap 4)', 3), climb(140, 'Circuit climb (lap 6)', 4), climb(170, 'Circuit climb (lap 8)', 4),
     climb(200, 'Circuit climb (lap 10)', 5), climb(222, 'Circuit climb (lap 12)', 6), climb(237, 'Circuit climb (lap 13)', 7), climb(252, 'Circuit climb (lap 14)', 7), climb(263, 'Circuit climb (final lap)', 8)
   ] },
+  // Olympic road race: smaller national squads, a hard hilly circuit, often won from a small group.
+  'olympics-road': { distance: 255, finish: 'small-group', circuit: true, sectors: [
+    climb(60, 'Olympic circuit climb (lap 1)', 4, 3), climb(105, 'Olympic circuit climb (lap 3)', 5, 3), climb(150, 'Olympic circuit climb (lap 5)', 6, 3),
+    climb(190, 'Olympic circuit climb (lap 7)', 6, 3), climb(218, 'Olympic circuit climb (lap 8)', 7, 3), climb(244, 'Olympic circuit climb (final lap)', 8, 3)
+  ] },
   'u23-worlds-road': { distance: 175, finish: 'small-group', circuit: true, sectors: [
     climb(70, 'Circuit climb (lap 3)', 3), climb(100, 'Circuit climb (lap 5)', 4), climb(130, 'Circuit climb (lap 7)', 5), climb(150, 'Circuit climb (lap 8)', 6), climb(171, 'Circuit climb (final lap)', 7)
   ] },

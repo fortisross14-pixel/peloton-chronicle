@@ -712,7 +712,7 @@ p,.story p,.page-head p,.profile-hero p,.muted{font-family:var(--body-copy)}
 .my-chronicle-grid article>div{display:flex;gap:8px;align-items:center}
 .movement{display:inline-flex;min-width:37px;justify-content:center;padding:2px 5px;border:1px solid rgba(0,0,0,.16);font-size:.72rem;font-weight:900;letter-spacing:.04em}
 .movement.up{color:#235d39;background:#e6f0df}.movement.down{color:#8d2c32;background:#f5dedb}.movement.new{color:#6a4c13;background:#f4e7b9}.movement.same{color:#6d665b;background:#eee8d9}
-.ranking-ribbon{display:grid;grid-template-columns:repeat(4,1fr);margin:14px 0;border-block:2px solid #4d2527;background:rgba(240,226,190,.55)}
+.ranking-ribbon{display:grid;grid-template-columns:repeat(5,1fr);margin:14px 0;border-block:2px solid #4d2527;background:rgba(240,226,190,.55)}
 .ranking-ribbon span{padding:12px;border-right:1px solid rgba(77,37,39,.28);text-transform:uppercase;font-size:.72rem;letter-spacing:.08em}
 .ranking-ribbon strong{display:block;margin-top:4px;font-family:Georgia,'Times New Roman',serif;font-size:1rem;text-transform:none;letter-spacing:0}
 .six-tabs{overflow-x:auto;scrollbar-width:thin}.six-tabs button{white-space:nowrap}
@@ -963,3 +963,9 @@ p,.story p,.page-head p,.profile-hero p,.muted{font-family:var(--body-copy)}
 .winner-race-name .flag-badge{vertical-align:middle;margin-right:.25em}.winner-race-name .flag-badge img{width:44px;height:33px}.winner-race-name .flag-badge small{display:none}
 .winner-celebration .eyebrow{position:relative;color:#e2b85c}
 .winner-celebration h2 .flag-badge small{display:none}
+/* Live stage running in the background while the race screen is open */
+.live-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;border-left:5px solid var(--wine)}
+.live-banner strong{font:900 1.25rem/1.2 var(--display);color:var(--wine-dark);margin-right:6px}
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#c0392b;margin-right:4px;animation:live-pulse 1.2s ease-in-out infinite}
+@keyframes live-pulse{50%{opacity:.25}}
+.live-stage-back{flex:none;white-space:nowrap}

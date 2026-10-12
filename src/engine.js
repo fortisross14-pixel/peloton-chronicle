@@ -1,5 +1,10 @@
 import {
   BASE_EVENTS,
+  PRESTIGE_LADDER,
+  TIER_PRESTIGE_CAP,
+  OLYMPIC_EVENT_IDS,
+  olympicYear,
+  olympicHost,
   COUNTRY_DATABASE,
   COUNTRY_CYCLING_PROFILES,
   DEVELOPMENT_NATIONS,
@@ -25,7 +30,7 @@ const PROFILE_KEYS = ['flat','hilly','puncheur','mountain','time-trial','cobbles
 const SINGLE_DAY_PROFILE_FIXES = {
   omloop:'cobbles',strade:'hilly',sanremo:'hilly', 'sprint-classic':'flat',e3:'cobbles',gent:'cobbles',dwars:'cobbles',flanders:'cobbles',roubaix:'cobbles',
   amstel:'puncheur',fleche:'puncheur',liege:'puncheur',copenhagen:'flat','san-sebastian':'puncheur',cyclassics:'flat',bretagne:'hilly',quebec:'puncheur',montreal:'puncheur',
-  'worlds-tt':'time-trial','worlds-road':'puncheur',lombardia:'mountain',kuurne:'cobbles',nokere:'flat',brabant:'puncheur','u23-worlds-tt':'time-trial','u23-worlds-road':'puncheur'
+  'worlds-tt':'time-trial','worlds-road':'puncheur',lombardia:'mountain',kuurne:'cobbles',nokere:'flat',brabant:'puncheur','u23-worlds-tt':'time-trial','u23-worlds-road':'puncheur','olympics-tt':'time-trial','olympics-road':'puncheur'
 };
 const PROFILE_WEIGHTS = {
   flat: { sprinter:1.25, rouleur:1.08, 'time-trialist':1.02, 'all-rounder':1, cobbles:.98, puncheur:.92, climber:.78 },
@@ -297,6 +302,52 @@ function assignOpeningElite(riders,random){
   }}
 }
 function elitePriority(rider){return (rider.career?.grandTours||0)*8000+(rider.career?.monuments||0)*2500+(rider.career?.uciPoints||0)+currentAbility(rider)*80+rider.potential*60-(rider.age||25)*2;}
+// The elite tiers need riders who can win the biggest races. Grand Tours are won by climbers
+// and all-rounders, so each tier keeps a minimum of stage racers: when it is short, the best
+// young stage racer of the tier below steps up; when a tier is over its limit, its lowest-ranked
+// specialists step down. Riders keep their team and their whole history.
+const STAGE_RACER_TERRAINS=new Set(['climber','all-rounder']);
+const ELITE_STAGE_RACERS={generational:1,legend:4,epic:5};
+const RARITY_BELOW={generational:'legend',legend:'epic',epic:'rare'};
+function setRiderRarity(rider,rarity,year){
+  const range=RARITIES[rarity];rider.rarity=rarity;rider.baseSkill=clamp(Math.round(rider.baseSkill??rider.potential??range.min),range.min,range.max);rider.potential=rider.baseSkill;
+  if(ELITE_RARITIES.includes(rarity))rider.retirementAge=Math.max(rider.retirementAge||0,Math.min(38,rider.age+4));
+  const model=buildRiderSkills(rider,year);rider.skills=model.skills;rider.annualMultiplier=model.annualMultiplier;rider.annualRating=model.annualRating;rider.skillYear=year;
+}
+function balanceEliteComposition(riders,year,log=null){
+  const changes=[],moved=new Set();
+  for(const rarity of ELITE_RARITIES){
+    const active=()=>riders.filter(r=>!r.retired&&r.rarity===rarity);
+    const risers=(stageOnly)=>riders.filter(r=>!r.retired&&r.rarity===RARITY_BELOW[rarity]&&r.age>=20&&r.age<=31&&(!stageOnly||STAGE_RACER_TERRAINS.has(r.terrain))).sort((a,b)=>elitePriority(b)-elitePriority(a));
+    const promote=(rider)=>{setRiderRarity(rider,rarity,year);changes.push({riderId:rider.id,name:rider.name,from:RARITY_BELOW[rarity],to:rarity});};
+    let short=ELITE_STAGE_RACERS[rarity]-active().filter(r=>STAGE_RACER_TERRAINS.has(r.terrain)).length;
+    while(short>0){const rider=risers(true)[0];if(!rider)break;promote(rider);short-=1;}
+    let missing=(ELITE_LIMITS[rarity]?.min??ELITE_TARGETS[rarity])-active().length;
+    while(missing>0){const rider=risers(false)[0];if(!rider)break;promote(rider);missing-=1;}
+    const limit=ELITE_LIMITS[rarity]?.max??ELITE_TARGETS[rarity];
+    while(active().length>limit){
+      // Young riders keep their rating to grow into it; established specialists step down first.
+      const all=active(),settled=all.filter(r=>!moved.has(r.id)),pool=settled.length?settled:all,list=pool.filter(r=>r.age>23).length?pool.filter(r=>r.age>23):pool,count=t=>all.filter(r=>r.terrain===t).length;
+      const victim=list.filter(r=>!STAGE_RACER_TERRAINS.has(r.terrain)&&count(r.terrain)>1).sort((a,b)=>elitePriority(a)-elitePriority(b))[0]||list.filter(r=>!STAGE_RACER_TERRAINS.has(r.terrain)).sort((a,b)=>elitePriority(a)-elitePriority(b))[0]||list.sort((a,b)=>elitePriority(a)-elitePriority(b))[0];
+      setRiderRarity(victim,RARITY_BELOW[rarity],year);moved.add(victim.id);changes.push({riderId:victim.id,name:victim.name,from:rarity,to:RARITY_BELOW[rarity]});
+    }
+  }
+  if(log)log(changes);return changes;
+}
+// v20 migration: older saves keep every rider, team and result, but are brought onto the
+// current balance: the prestige ladder, the Olympic Games, the elite composition and fame.
+function migrateToV20(state){
+  for(const event of state.events||[]){const ladder=PRESTIGE_LADDER[event.id];if(ladder!=null){event.prestige=ladder;event.basePrestige=ladder;}else event.prestige=Math.min(event.prestige||50,TIER_PRESTIGE_CAP[event.tier]||69);}
+  for(const base of BASE_EVENTS.filter(e=>OLYMPIC_EVENT_IDS.includes(e.id))){
+    if(state.events.some(e=>e.id===base.id))continue;
+    const event=structuredClone(base),value=eventDateValue(event);let index=state.events.findIndex(e=>eventDateValue(e)>value);if(index<0)index=state.events.length;
+    state.events.splice(index,0,event);if(index<(state.eventIndex||0)||(index===(state.eventIndex||0)&&state.seasonStatus==='complete'))state.eventIndex+=1;
+  }
+  scheduleOlympics(state);
+  const changes=balanceEliteComposition(state.riders||[],state.year);
+  if(changes.length){state.news=state.news||[];state.news.unshift({year:state.year,phase:'preseason',category:'Chronicle update',importance:'normal',headline:'Rider ratings revised',body:`The Chronicle has revised its elite ratings: ${changes.slice(0,6).map(c=>`${c.name} (${c.from} → ${c.to})`).join(', ')}${changes.length>6?` and ${changes.length-6} more`:''}.`,riderIds:changes.map(c=>c.riderId).slice(0,10)});}
+  recomputeFame(state);
+}
 function enforceEliteCaps(state){
   const next={generational:'legend',legend:'epic',epic:'rare'};
   for(const rarity of ELITE_RARITIES){
@@ -310,7 +361,8 @@ function refillEliteVacancies(state,random){
     const minimum=ELITE_LIMITS[rarity]?.min??ELITE_TARGETS[rarity];
     let missing=minimum-state.riders.filter(r=>!r.retired&&r.rarity===rarity).length;
     while(missing>0){const team=u23Teams.sort((a,b)=>a.roster.length-b.roster.length||b.reputation-a.reputation)[0];if(!team)break;if(team.roster.length>=TIER_ROSTER.u23){const expendable=team.roster.map(id=>riderById(state,id)).filter(r=>r&&!ELITE_RARITIES.includes(r.rarity)).sort((a,b)=>currentAbility(a)-currentAbility(b))[0];if(expendable){team.roster=team.roster.filter(id=>id!==expendable.id);expendable.retired=true;}}
-      const rider=makeRider(random,{teamId:team.id,tier:'u23',usedNames,ageRange:[18,19],year:state.year,forcedRarity:rarity});state.riders.push(rider);team.roster.push(rider.id);state.prospectSpawns.unshift({year:state.year,riderId:rider.id,riderName:rider.name,age:rider.age,nationality:rider.nationality,rarity:rider.rarity,potential:rider.potential,rating:Math.round(currentAbility(rider)),teamId:team.id,teamName:team.name});missing--;}
+      const rider=makeRider(random,{teamId:team.id,tier:'u23',usedNames,ageRange:[18,19],year:state.year,forcedRarity:rarity});
+      if(state.riders.filter(r=>!r.retired&&r.rarity===rarity&&STAGE_RACER_TERRAINS.has(r.terrain)).length<ELITE_STAGE_RACERS[rarity]&&!STAGE_RACER_TERRAINS.has(rider.terrain)){rider.terrain=random()<.6?'climber':'all-rounder';rider.program=programForTerrain(random,rider.terrain);rider.role=ROLE_BY_TERRAIN[rider.terrain];const model=buildRiderSkills(rider,state.year);rider.skills=model.skills;rider.annualMultiplier=model.annualMultiplier;rider.annualRating=model.annualRating;rider.skillYear=state.year;}state.riders.push(rider);team.roster.push(rider.id);state.prospectSpawns.unshift({year:state.year,riderId:rider.id,riderName:rider.name,age:rider.age,nationality:rider.nationality,rarity:rider.rarity,potential:rider.potential,rating:Math.round(currentAbility(rider)),teamId:team.id,teamName:team.name});missing--;}
   }
   state.prospectSpawns=state.prospectSpawns.slice(0,300);
 }
@@ -389,8 +441,8 @@ function recentRaceCount(rider,day,window=30){return (rider.raceLoadLog||[]).fil
 export function createUniverse({name='Main Chronicle',seed=20260728}={}){
   // Text seeds are hashed; without this every text seed produced the same universe.
   if(typeof seed!=='number'||!Number.isFinite(seed))seed=hashString(String(seed));
-  const random=mulberry32(seed),teams=[...WORLD_TEAMS.map(row=>makeTeam(random,row,'worldtour')),...PRO_TEAMS.map(row=>makeTeam(random,row,'proseries')),...makeDevelopmentTeams(random),...makeContinentalTeams(random)],riders=generateRosters(random,teams,2026);assignOpeningElite(riders,random);const {directors,agencies}=generateDirectors(random,teams,2026),events=structuredClone(BASE_EVENTS).sort((a,b)=>eventDateValue(a)-eventDateValue(b));
-  const state={version:19,resultConsistencyV11:true,name,seed,startYear:2026,year:2026,currentDay:1,eventIndex:0,seasonStatus:'active',reviewMode:false,pendingArchive:null,teams,riders,directors,directorAgencies:agencies,events,eventResults:[],currentResult:null,news:[],archives:[],transfers:[],directorMoves:[],sponsorLog:[],tierChanges:[],retirements:[],prospectSpawns:[],rivalries:[],watchlist:{riders:[],teams:[],directors:[],races:[],countries:[]},weeklyRankings:[],rankingMilestones:[],graduationClasses:[],settings:{autosave:true,stageDetail:'winners',showcase:{grandTours:true,monuments:true,worlds:true,speed:1}},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+  const random=mulberry32(seed),teams=[...WORLD_TEAMS.map(row=>makeTeam(random,row,'worldtour')),...PRO_TEAMS.map(row=>makeTeam(random,row,'proseries')),...makeDevelopmentTeams(random),...makeContinentalTeams(random)],riders=generateRosters(random,teams,2026);assignOpeningElite(riders,random);balanceEliteComposition(riders,2026);const {directors,agencies}=generateDirectors(random,teams,2026),events=structuredClone(BASE_EVENTS).sort((a,b)=>eventDateValue(a)-eventDateValue(b));
+  const state={version:20,prestigeLadderV20:true,resultConsistencyV11:true,name,seed,startYear:2026,year:2026,currentDay:1,eventIndex:0,seasonStatus:'active',reviewMode:false,pendingArchive:null,teams,riders,directors,directorAgencies:agencies,events,eventResults:[],currentResult:null,news:[],archives:[],transfers:[],directorMoves:[],sponsorLog:[],tierChanges:[],retirements:[],prospectSpawns:[],rivalries:[],watchlist:{riders:[],teams:[],directors:[],races:[],countries:[]},weeklyRankings:[],rankingMilestones:[],graduationClasses:[],settings:{autosave:true,stageDetail:'winners',showcase:{grandTours:true,monuments:true,worlds:true,speed:1}},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
   for(const team of teams){const director=directorById(state,team.directorId);if(director)team.finances.directorSalary=director.salary||0;team.finances.salaries=team.roster.map(id=>riderById(state,id)).filter(Boolean).reduce((sum,r)=>sum+(r.salary||0),0);team.finances.balance=team.finances.annualIncome-team.finances.salaries-team.finances.directorSalary;}
   prepareSeason(state);captureWeeklyRankingSnapshot(state,1,{force:true,silent:true});state.prospectSpawns=state.riders.filter(r=>r.tier==='u23'&&['generational','legend','epic'].includes(r.rarity)).map(r=>({year:2026,riderId:r.id,riderName:r.name,age:r.age,nationality:r.nationality,rarity:r.rarity,potential:r.potential,rating:Math.round(currentAbility(r)),teamId:r.teamId,teamName:teamById(state,r.teamId)?.name||'U23 program'}));openingNews(state);return state;
 }
@@ -424,7 +476,7 @@ function normalizedBaseSkill(rider,previousVersion){
 // (it touches every rider ever generated), so it runs once per loaded state object.
 // Later calls only refresh the cheap per-season values.
 const UPGRADED_STATES=new WeakSet();
-const CURRENT_SAVE_VERSION=19;
+const CURRENT_SAVE_VERSION=20;
 export function upgradeUniverse(state){
   if(!state)return state;
   if(UPGRADED_STATES.has(state)&&state.version===CURRENT_SAVE_VERSION){
@@ -458,6 +510,8 @@ export function upgradeUniverse(state){
   if(previousVersion<4||!state.detailRepairV4){repairHistoricalDetails(state);state.detailRepairV4=true;}
   if(previousVersion<5||!Array.isArray(state.uciPointEvents)){rebuildUciPointEvents(state);syncUciTotalsFromLedger(state);state.uciRankingV5=true;}
   if(previousVersion<7||!state.eliteCapsV7){enforceEliteCaps(state);state.eliteCapsV7=true;}enforceEliteCaps(state);refillEliteVacancies(state,mulberry32(hashString(`${state.seed}|${state.year}|${state.currentDay||1}|elite-v191`)));state.economyV8=true;state.skillModelV9=true;state.raceBalanceV10=true;state.conditionModelV12=true;if(previousVersion<11||!state.resultConsistencyV11)reconcileCurrentSeasonResults(state,{force:true});state.resultConsistencyV11=true;state.chronicleParityV16=true;if(!state.weeklyRankings.length)captureWeeklyRankingSnapshot(state,state.currentDay||1,{force:true,silent:true});
+  if(previousVersion<20||!state.prestigeLadderV20){migrateToV20(state);state.prestigeLadderV20=true;}
+  else if((state.riders||[]).some(r=>r.fame==null))recomputeFame(state);
   UPGRADED_STATES.add(state);
   return state;
 }
@@ -505,10 +559,14 @@ function openingNews(state){
     {year:state.year,phase:'preseason',category:'Team economy',importance:'normal',headline:'Sponsors shape the market',body:'Organizations persist beneath changing commercial identities, while sponsor investment governs budgets and rider attraction.'}
   ];
 }
+// The Olympic road race and time trial are only held every fourth year, each time in a new host country.
+function scheduleOlympics(state){for(const event of state.events||[])if(OLYMPIC_EVENT_IDS.includes(event.id)){event.active=olympicYear(state.year);event.country=olympicHost(state.year);}}
+export function eventHeldThisYear(event){return event?.active!==false;}
 function prepareSeason(state){
   state.eventIndex=0;state.currentDay=1;state.currentResult=null;state.eventResults=[];state.currentSeasonConsistencyStamp=null;state.seasonStatus='active';state.reviewMode=false;state.pendingArchive=null;
   // Grand Tour routes are redrawn every year; the stage list follows this edition's route.
   for(const event of state.events)if(['giro','tour','vuelta'].includes(event.id))event.stageProfiles=stageProfilesForYear(event,state.year);
+  scheduleOlympics(state);
   for(const team of state.teams){team.uciPoints=0;team.currentSeason=freshStats();}
   for(const director of state.directors){if(!director.retired)director.currentSeason=freshStats();}
   for(const rider of state.riders){if(rider.retired){
@@ -531,7 +589,9 @@ function assignGrandTourSquads(state){
       if(!(rider.program==='grand-tour'||(elite(rider)&&rider.program!=='monuments')))continue;
       // A team spreads its leaders across the three Grand Tours; personal taste breaks ties.
       const leadersIn=gt=>riders.filter(r=>squads.get(r.id)===gt.id&&(elite(r)||r.program==='grand-tour')).length;
-      const preference=gt=>eventTargetScore(gt,rider,state.year)+deterministicNoise(state,rider.id,gt.id,'grand-tour-choice')*14-leadersIn(gt)*22;
+      // A rider who has already won a Grand Tour is drawn to the ones missing from his palmarès.
+      const titles=gt=>(gt.editions||[]).filter(e=>e.winnerId===rider.id).length;
+      const preference=gt=>eventTargetScore(gt,rider,state.year)+deterministicNoise(state,rider.id,gt.id,'grand-tour-choice')*14-leadersIn(gt)*22-Math.max(0,titles(gt)-1)*8;
       const choice=[...grandTours].sort((a,b)=>preference(b)-preference(a)).find(gt=>riders.filter(r=>squads.get(r.id)===gt.id).length<8);
       if(choice)squads.set(rider.id,choice.id);
     }
@@ -562,7 +622,7 @@ function planCalendars(state){
     }
     if(rider.rarity==='generational'){
       for(const kind of [rider.program==='grand-tour'?'monument':'grand-tour','stage']){
-        const option=candidates.filter(event=>event.kind===kind&&!selected.includes(event)&&event.prestige>=86&&calendarLoadAllows(state,event,selected,rider)).sort((a,b)=>eventTargetScore(b,rider)-eventTargetScore(a,rider))[0];
+        const option=candidates.filter(event=>event.kind===kind&&!selected.includes(event)&&event.prestige>=78&&calendarLoadAllows(state,event,selected,rider)).sort((a,b)=>eventTargetScore(b,rider)-eventTargetScore(a,rider))[0];
         if(option&&selected.length<targetCap){selected.push(option);days+=eventDuration(option);}
       }
     }
@@ -588,7 +648,7 @@ function eventTerrainFit(event,rider,year){
   if(event.stageProfiles.length===1&&event.stageProfiles[0]!=='time-trial'){const signature=routeTerrainSignature(event,year);return Object.entries(signature).reduce((sum,[profile,weight])=>sum+riderProfileRating(rider,profile)*weight,0)-currentAbility(rider);}
   return Math.max(...event.stageProfiles.map(profile=>stageSkillRating(rider,profile)))-currentAbility(rider);
 }
-function eventTargetScore(event,rider,year=rider.skillYear||2026){const kind=event.kind==='grand-tour'?'grand-tour':event.kind==='stage'?'stage':event.kind==='monument'?'monument':event.kind==='championship'?'championship':'one-day',program=PROGRAM_EVENT_WEIGHTS[rider.program]?.[kind]||1,oneDay=event.stageProfiles.length===1,terrainFit=eventTerrainFit(event,rider,year)*(oneDay?2:1),prestige=event.prestige/100,eliteMajor=rider.rarity==='generational'&&event.prestige>=90?18:rider.rarity==='legend'&&event.prestige>=94?8:0,agePenalty=rider.age>=35&&event.stageProfiles.length>10?.92:1;return 50*program+terrainFit*3+20*prestige*agePenalty+eliteMajor;}
+function eventTargetScore(event,rider,year=rider.skillYear||2026){const kind=event.kind==='grand-tour'?'grand-tour':event.kind==='stage'?'stage':event.kind==='monument'?'monument':event.kind==='championship'?'championship':'one-day',program=PROGRAM_EVENT_WEIGHTS[rider.program]?.[kind]||1,oneDay=event.stageProfiles.length===1,terrainFit=eventTerrainFit(event,rider,year)*(oneDay?2:1),prestige=event.prestige/100,eliteMajor=rider.rarity==='generational'&&event.prestige>=90?18:rider.rarity==='legend'&&event.prestige>=92?8:0,agePenalty=rider.age>=35&&event.stageProfiles.length>10?.92:1;return 50*program+terrainFit*3+20*prestige*agePenalty+eliteMajor;}
 
 function favoriteTerrainBonus(rider,profile){
   const t=rider.terrain;
@@ -609,13 +669,13 @@ export function raceFavoriteScore(state,rider,event){
   const targeted=(rider.targetEvents||[]).includes(event.id)?3.5:0;
   if(event.kind==='grand-tour'){
     const profiles=event.stageProfiles||[],selective=profiles.filter(p=>['mountain','time-trial','hilly','puncheur'].includes(p)),routeFit=(selective.length?selective.reduce((s,p)=>s+stageSkillRating(rider,p),0)/selective.length:grandTourGcRating(rider));
-    const program=rider.program==='grand-tour'?7:rider.program==='one-week'?2:rider.program==='stage-hunter'?-4:rider.program==='monuments'?-7:0,terrain=rider.terrain==='all-rounder'?6:rider.terrain==='climber'?5:rider.terrain==='time-trialist'?2:rider.terrain==='puncheur'?-5:rider.terrain==='rouleur'?-7:rider.terrain==='cobbles'?-11:rider.terrain==='sprinter'?-14:-6;
-    return grandTourGcRating(rider)*.72+routeFit*.28+program+terrain+condition+teamSupport+targeted;
+    const program=rider.program==='grand-tour'?7:rider.program==='one-week'?2:rider.program==='stage-hunter'?-4:rider.program==='monuments'?-7:0,terrain=rider.terrain==='all-rounder'?5:rider.terrain==='climber'?7:rider.terrain==='time-trialist'?0:rider.terrain==='puncheur'?-9:rider.terrain==='rouleur'?-12:rider.terrain==='cobbles'?-16:rider.terrain==='sprinter'?-22:-6;
+    return grandTourGcRating(rider)*.72+routeFit*.28+program+terrain+condition+teamSupport+targeted-titleStreakPenalty(event,rider);
   }
   if(event.stageProfiles?.length===1&&event.stageProfiles[0]!=='time-trial'){
     // Same picture of the route the race engine rides: decisive sectors plus the finish.
-    const signature=routeTerrainSignature(event,state.year),fit=Object.entries(signature).reduce((sum,[profile,weight])=>sum+riderProfileRating(rider,profile)*weight,0),routeSkill=fit+(fit-riderSkillAverage(rider))*TERRAIN_SPECIALISATION;
-    return routeSkill+condition+teamSupport+targeted;
+    const signature=routeTerrainSignature(event,state.year),fit=Object.entries(signature).reduce((sum,[profile,weight])=>sum+riderProfileRating(rider,profile)*weight,0),affinity=Object.entries(signature).reduce((sum,[profile,weight])=>sum+terrainAffinity(rider,profile)*weight,0),routeSkill=fit+(fit-riderSkillAverage(rider))*TERRAIN_SPECIALISATION+affinity;
+    return routeSkill+condition+teamSupport+targeted-titleStreakPenalty(event,rider);
   }
   const profile=(event.stageProfiles||['hilly'])[0],skill=stageSkillRating(rider,profile),programFit=rider.program==='monuments'&&['monument','championship','one-day'].includes(event.kind)?6:rider.program==='stage-hunter'?1:rider.program==='grand-tour'?-2:0,worldTt=event.id==='worlds-tt'?stageSkillRating(rider,'time-trial')*1.18:0,history=(event.editions||[]).filter(e=>e.winnerId===rider.id).length*Math.min(3,event.prestige/40),terrainBonus=favoriteTerrainBonus(rider,profile);
   return skill*1.08+currentAbility(rider)*.12+programFit+terrainBonus+condition+teamSupport+targeted+history+(worldTt?worldTt-skill:0);
@@ -632,7 +692,7 @@ function raceConditionAdjustment(rider){const shape=rider.raceShape??rider.form?
 function riderAvailableForEvent(state,rider,event,{allowEmergency=false}={}){if((rider.injuryWeeks||0)>0)return false;const start=startDay(state,event),targeted=(rider.targetEvents||[]).includes(event.id),elite=ELITE_RARITIES.includes(rider.rarity)||rider.role!=='Domestique',load=recentRaceDays(rider,start,28),count=recentRaceCount(rider,start,30),duration=eventDuration(event);if((rider.busyUntilDay||0)>=start||(rider.mandatoryRestUntil||0)>=start)return false;if(event.kind==='grand-tour'){if(load>0)return false;}else if(load+duration>(elite?18:22))return false;if(count+1>(rider.program==='monuments'?6:5)||rider.fatigue>=76)return false;if(!targeted&&!allowEmergency&&elite)return false;return true;}
 function regionalAffinity(event,team){if(event.region!=='EUR')return team.nationality==='USA'&&event.region==='AME'?5:0;const c=event.id.includes('burgos')||event.id.includes('asturias')||event.id.includes('valenciana')?'ESP':event.id.includes('belg')||['omloop','e3','gent','dwars','flanders','brabant','wallonie'].includes(event.id)?'BEL':event.id.includes('ital')||['giro','strade','sanremo','lombardia','piemonte','tirreno'].includes(event.id)?'ITA':event.id.includes('fr')||['tour','dauphine','paris-nice','bretagne','paris-tours','dunkirk'].includes(event.id)?'FRA':null;return team.nationality===c?8:0;}
 function selectionScore(state,rider,event){const targeted=rider.targetEvents.includes(event.id),eventFit=Math.max(...event.stageProfiles.map(type=>stageSkillRating(rider,type))),shape=rider.raceShape??35,load=recentRaceDays(rider,startDay(state,event),28),targetBonus=targeted?32:(ELITE_RARITIES.includes(rider.rarity)||rider.role!=='Domestique'?-36:-8),fatiguePenalty=(rider.fatigue||0)*1.05+load*.55,readiness=(shape-45)*.34;return eventFit+targetBonus+readiness+rider.morale*.03-fatiguePenalty+deterministicNoise(state,rider.id,event.id)*5;}
-function nationalSelections(state,event,u23=false){const pool=state.riders.filter(r=>!r.retired&&(u23?r.age<=22:!['u23','continental'].includes(r.tier))&&riderAvailableForEvent(state,r,event,{allowEmergency:false})),nations=[...new Set(pool.map(r=>r.nationality))];return nations.map(nation=>({id:`${u23?'u23-':''}nation-${nation}`,name:`${nation} ${u23?'U23 ':''}Selection`,nationality:nation,tier:u23?'u23':'national',roster:pool.filter(r=>r.nationality===nation).sort((a,b)=>selectionScore(state,b,event)-selectionScore(state,a,event)).slice(0,u23?6:8).map(r=>r.id)})).filter(t=>t.roster.length>=3).sort((a,b)=>b.roster.length-a.roster.length).slice(0,EVENT_TEAM_LIMIT[event.kind]||22);}
+function nationalSelections(state,event,u23=false){const pool=state.riders.filter(r=>!r.retired&&(u23?r.age<=22:!['u23','continental'].includes(r.tier))&&riderAvailableForEvent(state,r,event,{allowEmergency:false})),nations=[...new Set(pool.map(r=>r.nationality))];return nations.map(nation=>({id:`${u23?'u23-':''}nation-${nation}`,name:`${nation} ${u23?'U23 ':''}Selection`,nationality:nation,tier:u23?'u23':'national',roster:pool.filter(r=>r.nationality===nation).sort((a,b)=>selectionScore(state,b,event)-selectionScore(state,a,event)).slice(0,event.id==='olympics-tt'?2:event.id==='olympics-road'?4:u23?6:8).map(r=>r.id)})).filter(t=>t.roster.length>=(OLYMPIC_EVENT_IDS.includes(event.id)?1:3)).sort((a,b)=>b.roster.length-a.roster.length).slice(0,EVENT_TEAM_LIMIT[event.kind]||22);}
 function eventTeams(state,event){
   const active=state.teams.filter(t=>t.status==='active');if(event.tier==='u23')return nationalSelections(state,event,true);if(event.tier==='national')return nationalSelections(state,event,false);
   if(event.tier==='continental'){return active.filter(t=>t.tier==='continental'&&(t.continent===event.region||event.region==='EUR')).sort((a,b)=>b.reputation-a.reputation).slice(0,12).concat(active.filter(t=>t.tier==='proseries').sort((a,b)=>b.reputation-a.reputation).slice(0,4));}
@@ -669,19 +729,37 @@ function finishSkillRating(rider,kind){const skills=rider.skills||{},avg=riderSk
 // own average is amplified, so a climber beats a stronger rouleur on a mountain and the
 // rouleur takes his revenge on the cobbles.
 const TERRAIN_SPECIALISATION=2;
+// Every rider keeps his speciality on race day. Skills alone let a great all-round talent beat
+// specialists on their own ground (a generational puncheur out-sprinting the sprinters and
+// out-climbing the climbers); these offsets keep each type strongest where it belongs and
+// clearly weaker away from it, however talented.
+const TERRAIN_AFFINITY={
+  sprinter:{sprint:5,flat:3,punch:-2,hill:-7,climb:-16,descend:-3,tt:-8,cobbles:-1,cobbledClimb:-5,gravel:-4},
+  climber:{climb:5,hill:1,descend:1,punch:-3,sprint:-14,flat:-5,tt:-5,cobbles:-10,cobbledClimb:-6,gravel:-5},
+  puncheur:{punch:5,hill:4,cobbledClimb:1,climb:-8,sprint:-8,flat:-3,tt:-9,cobbles:-4,gravel:-2},
+  'all-rounder':{climb:-1,tt:-1,punch:-2,sprint:-9,flat:-2,cobbles:-5,cobbledClimb:-4,gravel:-3},
+  'time-trialist':{tt:6,flat:2,climb:-7,hill:-5,punch:-7,sprint:-11,cobbles:-2,gravel:-2},
+  rouleur:{flat:4,tt:2,cobbles:2,gravel:2,climb:-11,hill:-5,punch:-6,sprint:-5},
+  cobbles:{cobbles:6,cobbledClimb:5,gravel:3,flat:1,climb:-13,hill:-4,punch:-3,sprint:-4,tt:-4}
+};
+export function terrainAffinity(rider,profile){return TERRAIN_AFFINITY[rider.terrain]?.[profile]||0;}
 // Condition fine-tunes a race; it must not outweigh talent. Sharpness from racing is worth
 // a few points either way, fatigue costs more the deeper it goes.
 function raceDayCondition(rider){const shape=rider.raceShape??rider.form??45,fatigue=rider.fatigue??0;return (shape-55)*.13+(rider.form-60)*.05-fatigue*.12-(rider.injuryWeeks||0)*4;}
 export function raceDayPerformance(state,rider,profile,event,team){
-  const fit=FINISH_SKILL_WEIGHTS[profile]?finishSkillRating(rider,profile):stageSkillRating(rider,profile),skill=fit+(fit-riderSkillAverage(rider))*TERRAIN_SPECIALISATION,programKind=event.kind==='grand-tour'?'grand-tour':['stage','u23-stage'].includes(event.kind)?'stage':['championship','u23-championship'].includes(event.kind)?'championship':event.kind==='monument'?'monument':'one-day',program=1+((PROGRAM_EVENT_WEIGHTS[rider.program]?.[programKind]||1)-1)*.15,targeted=rider.targetEvents.includes(event.id)?1.03:.99,freshness=clamp(1-rider.fatigue/360,.77,1.02),director=team?.directorId?directorById(state,team.directorId):null,directorBonus=director?1+(director.tactics-70)/720+(director.development-70)/2200:1,facilityBonus=team?1+((team.facilities||5)-6.5)/230:1;
-  return (skill+raceDayCondition(rider))*program*targeted*freshness*directorBonus*facilityBonus;
+  const fit=FINISH_SKILL_WEIGHTS[profile]?finishSkillRating(rider,profile):stageSkillRating(rider,profile),skill=fit+(fit-riderSkillAverage(rider))*TERRAIN_SPECIALISATION+terrainAffinity(rider,profile),programKind=event.kind==='grand-tour'?'grand-tour':['stage','u23-stage'].includes(event.kind)?'stage':['championship','u23-championship'].includes(event.kind)?'championship':event.kind==='monument'?'monument':'one-day',program=1+((PROGRAM_EVENT_WEIGHTS[rider.program]?.[programKind]||1)-1)*.15,targeted=rider.targetEvents.includes(event.id)?1.03:.99,freshness=clamp(1-rider.fatigue/360,.77,1.02),director=team?.directorId?directorById(state,team.directorId):null,directorBonus=director?1+(director.tactics-70)/720+(director.development-70)/2200:1,facilityBonus=team?1+((team.facilities||5)-6.5)/230:1;
+  return (skill+raceDayCondition(rider)-titleStreakPenalty(event,rider))*program*targeted*freshness*directorBonus*facilityBonus;
 }
+// A rider going for the same title again carries the weight of it: rivals study him, his team
+// is asked to control every day, and the hunger is not quite what it was. Consecutive wins of
+// a race cost a little on race day, so dynasties are possible but hard to sustain.
+function titleStreakPenalty(event,rider){const editions=event.editions||[];let streak=0;for(let i=editions.length-1;i>=0&&editions[i].winnerId===rider.id;i-=1)streak+=1;return streak<=0?0:streak===1?0.8:streak===2?2.5:4.5;}
 function eventPointScale(event){
   if(event.id==='tour')return UCI_POINTS.tourGc;
   if(event.id==='giro'||event.id==='vuelta')return UCI_POINTS.giroVueltaGc;
   if(event.kind==='monument')return UCI_POINTS.monument;
   if(event.kind==='championship')return UCI_POINTS.worlds;
-  if(event.tier==='worldtour'&&event.kind==='stage')return event.prestige>=86?UCI_POINTS.wtMajorStage:UCI_POINTS.wtStage;
+  if(event.tier==='worldtour'&&event.kind==='stage')return event.prestige>=79?UCI_POINTS.wtMajorStage:UCI_POINTS.wtStage;
   if(event.tier==='worldtour')return UCI_POINTS.wtOneDay;
   if(event.tier==='proseries')return event.kind==='stage'?UCI_POINTS.proStage:UCI_POINTS.proOneDay;
   if(event.tier==='u23')return UCI_POINTS.u23;
@@ -736,7 +814,7 @@ export function detectSeasonRivalries(state){
   state.rivalries=state.rivalries||[];const results=(state.eventResults||[]).filter(result=>result.year===state.year&&rivalryEligibleEvent(state,result));const pairs=new Map();
   for(const result of results){const podium=(result.classification||[]).slice(0,3);for(let i=0;i<podium.length;i+=1)for(let j=i+1;j<podium.length;j+=1){const first=podium[i],second=podium[j],winner=result.winnerId;if(winner!==first.riderId&&winner!==second.riderId)continue;const ids=[first.riderId,second.riderId].sort(),id=rivalryPairId(first.riderId,second.riderId),row=pairs.get(id)||{id,aId:ids[0],bId:ids[1],shared:[],wins:new Map()};const aRow=first.riderId===row.aId?first:second,bRow=first.riderId===row.bId?first:second;row.shared.push({year:state.year,eventId:result.eventId,eventName:result.eventName,prestige:result.prestige||eventById(state,result.eventId)?.prestige||0,winnerId:winner,aRank:aRow.rank,bRank:bRow.rank,aGap:aRow.gap||0,bGap:bRow.gap||0,gap:Math.abs((aRow.gap||0)-(bRow.gap||0))});row.wins.set(winner,(row.wins.get(winner)||0)+1);pairs.set(id,row);}}
   const created=[];for(const row of pairs.values()){
-    if(row.shared.length<5)continue;if((row.wins.get(row.aId)||0)<1||(row.wins.get(row.bId)||0)<1)continue;if(!row.shared.some(x=>x.prestige>=91))continue;if(!row.shared.some(x=>x.gap<45))continue;if(state.rivalries.some(r=>r.aId===row.aId&&r.bId===row.bId))continue;
+    if(row.shared.length<5)continue;if((row.wins.get(row.aId)||0)<1||(row.wins.get(row.bId)||0)<1)continue;if(!row.shared.some(x=>x.prestige>=86))continue;if(!row.shared.some(x=>x.gap<45))continue;if(state.rivalries.some(r=>r.aId===row.aId&&r.bId===row.bId))continue;
     const declarationRows=row.shared.slice();
     const rivalry={id:`rivalry-${row.id}`,aId:row.aId,bId:row.bId,startYear:state.year,endYear:null,status:'active',declaration:{sharedPodiums:declarationRows.length,qualifyingRaces:declarationRows},headToHead:declarationRows.map(x=>({year:state.year,eventId:x.eventId,eventName:x.eventName,prestige:x.prestige,aRank:x.aRank,bRank:x.bRank,winnerId:x.winnerId,gap:x.gap,declarationYear:true}))};state.rivalries.push(rivalry);created.push(rivalry);
   }
@@ -771,7 +849,7 @@ function postEventRest(rider,event,end){const load=recentRaceDays(rider,end,28),
 
 
 export function simulateNextEvent(state){
-  upgradeUniverse(state);const event=state.events[state.eventIndex];if(!event)return completeSeason(state);recoverBeforeEvent(state,event);
+  upgradeUniverse(state);const event=state.events[state.eventIndex];if(!event)return completeSeason(state);if(!eventHeldThisYear(event)){state.eventIndex+=1;return simulateNextEvent(state);}recoverBeforeEvent(state,event);
   const random=mulberry32(hashString(`${state.seed}|${state.year}|${event.id}|simulation`)),teams=eventTeams(state,event);let participants=[];
   for(const team of teams){const roster=team.id.startsWith('nation-')||team.id.startsWith('u23-nation-')?team.roster.map(id=>riderById(state,id)).filter(Boolean):rosterForTeam(state,team,event);participants.push(...roster.map(rider=>({rider,team})));}
   {const seen=new Set();participants=participants.filter(entry=>!seen.has(entry.rider.id)&&seen.add(entry.rider.id));}
@@ -839,7 +917,7 @@ function recordTeamClassification(book,event,year){
 }
 
 function commitEvent(state,event,result,participants,final){
-  const winner=riderById(state,result.winnerId);recordWin(winner.currentSeason,event,state.year);recordWin(winner.career,event,state.year);if(event.id==='worlds-road'||event.id==='worlds-tt')winner.career.worlds=(winner.career.worlds||0)+1;
+  const winner=riderById(state,result.winnerId);recordWin(winner.currentSeason,event,state.year);recordWin(winner.career,event,state.year);if(event.id==='worlds-road'||event.id==='worlds-tt')winner.career.worlds=(winner.career.worlds||0)+1;if(OLYMPIC_EVENT_IDS.includes(event.id))winner.career.olympics=(winner.career.olympics||0)+1;
   const winnerTeam=teamById(state,winner.teamId);if(winnerTeam){recordWin(winnerTeam.currentSeason,event,state.year);recordWin(winnerTeam.career,event,state.year);const director=directorById(state,winnerTeam.directorId);if(director){recordWin(director.currentSeason,event,state.year);recordWin(director.career,event,state.year);}}
   for(const [type,id] of Object.entries(result.jerseys).filter(([,value])=>Boolean(value))){const r=riderById(state,id);if(r){recordJersey(r.currentSeason,event,type,state.year);recordJersey(r.career,event,type,state.year);const t=teamById(state,r.teamId);if(t){recordJersey(t.currentSeason,event,type,state.year);recordJersey(t.career,event,type,state.year);const d=directorById(state,t.directorId);if(d){recordJersey(d.currentSeason,event,type,state.year);recordJersey(d.career,event,type,state.year);}}}}
   if(result.teamClassification){
@@ -853,7 +931,7 @@ function commitEvent(state,event,result,participants,final){
   for(const{rider}of participants){const row=(result.classification||[]).find(x=>x.riderId===rider.id),stagesWon=(result.stages||[]).filter(stage=>stage.winnerId===rider.id).length,jerseys=Object.entries(result.jerseys||{}).filter(([,id])=>id===rider.id).map(([type])=>type);const abandon=(result.abandons||[]).find(a=>a.riderId===rider.id);rider.currentSeason.raceResults=rider.currentSeason.raceResults||[];rider.currentSeason.raceResults.push({eventId:event.id,event:event.name,year:state.year,month:event.month,day:event.day,tier:event.tier,kind:event.kind,rank:row?.rank||21,over20:!row,stagesWon,jerseys,...(abandon?{dnf:true,dnfStage:abandon.stage,dnfCause:abandon.kind}:{})});increment(rider.currentSeason,'starts',1,event.tier);increment(rider.career,'starts',1,event.tier);}
   final.slice(0,10).forEach((entry,index)=>{const rider=entry.rider;if(index<3){increment(rider.currentSeason,'podiums',1,event.tier);increment(rider.career,'podiums',1,event.tier);}increment(rider.currentSeason,'top10',1,event.tier);increment(rider.career,'top10',1,event.tier);const rec={eventId:event.id,event:event.name,rank:index+1,year:state.year,tier:event.tier,kind:event.kind};rider.currentSeason.bestResults.push(rec);rider.currentSeason.bestResults.sort((a,b)=>resultValue(b,state)-resultValue(a,state));rider.currentSeason.bestResults=rider.currentSeason.bestResults.slice(0,10);if(index<5)rider.career.results.push({...rec,prestige:event.prestige});rider.career.results=rider.career.results.slice(-180);if(event.kind==='grand-tour')rider.currentSeason.grandTourResults.push({eventId:event.id,event:event.name,rank:index+1});});
   for(const{rider}of participants){const days=eventDuration(event);rider.raceDays+=days;increment(rider.currentSeason,'raceDays',days,event.tier);increment(rider.career,'raceDays',days,event.tier);rider.fatigue=clamp((rider.fatigue||0)+eventFatigueLoad(rider,event),0,100);const shapeGain=days===1?4:Math.min(16,days*1.35),fatigueDrag=Math.max(0,rider.fatigue-62)*.12;rider.raceShape=clamp((rider.raceShape??30)+shapeGain+(rider.targetEvents.includes(event.id)?2:0)-fatigueDrag,12,95);rider.form=clamp(rider.form+(rider.targetEvents.includes(event.id)?.7:0)-Math.max(0,rider.fatigue-72)*.08,30,92);const finish=endDay(state,event);rider.mandatoryRestUntil=Math.max(rider.mandatoryRestUntil||0,postEventRest(rider,event,finish));}
-  event.editions=event.editions||[];event.editions.push({year:state.year,winnerId:result.winnerId,winnerName:result.winnerName,teamId:result.winnerTeamId,tier:event.tier,top10:result.classification.slice(0,10),stageWinners:result.stages.map(s=>({riderId:s.winnerId,name:s.winnerName,teamId:s.teamId,profile:s.profile})),jerseys:result.jerseys,teamClassification:result.teamClassification,jerseyWinners:Object.fromEntries(Object.entries(result.jerseys).map(([type,id])=>[type,id?{id,name:riderById(state,id)?.name||id,teamId:riderById(state,id)?.teamId||null}:null]))});
+  event.editions=event.editions||[];event.editions.push({year:state.year,winnerId:result.winnerId,winnerName:result.winnerName,teamId:result.winnerTeamId,tier:event.tier,top10:result.classification.slice(0,10),stageWinners:result.stages.map(s=>({riderId:s.winnerId,name:s.winnerName,teamId:s.teamId,profile:s.profile})),jerseys:result.jerseys,teamClassification:result.teamClassification,jerseyWinners:Object.fromEntries(Object.entries(result.jerseys).map(([type,id])=>[type,id?{id,name:riderById(state,id)?.name||id,teamId:riderById(state,id)?.teamId||null}:null]))});addEditionFame(state,event,event.editions.at(-1));
   state.currentSeasonConsistencyStamp=null;updateRivalriesFromResult(state,result);state.news.unshift(buildEventStory(state,event,result,final));state.news=state.news.slice(0,180);
 }
 function resultValue(result,state){const event=eventById(state,result.eventId);return(event?.prestige||50)*5-(result.rank||20)*10;}
@@ -885,7 +963,7 @@ function buildEventStory(state,event,result,final){
     body=`${decisive?`${decisive} `:''}${finish}`;
   }
   if(result.comeback){headline=`Comeback complete: ${winner.name} wins ${event.name}`;body+=` It is his first victory since ${result.comeback.cause} at ${result.comeback.eventName} kept him out for ${result.comeback.weeks} weeks.`;}
-  return{year:state.year,phase:'season',eventId:event.id,category:event.kind==='grand-tour'?'Grand Tour':event.kind==='monument'?'Monuments':event.tier==='u23'?'Young Wheels':'Race report',importance:event.prestige>=96?'lead':surprise||result.comeback?'major':'normal',headline,body,riderIds:[winner.id,...(runner?[runner.id]:[])]};
+  return{year:state.year,phase:'season',eventId:event.id,category:event.kind==='grand-tour'?'Grand Tour':event.kind==='monument'?'Monuments':event.tier==='u23'?'Young Wheels':'Race report',importance:event.prestige>=92?'lead':surprise||result.comeback?'major':'normal',headline,body,riderIds:[winner.id,...(runner?[runner.id]:[])]};
 }
 
 export function simulateWeeks(state,weeks=1){
@@ -970,7 +1048,27 @@ export function openNextSeason(state){
   applyRetirementsAndDevelopment(state);for(const rivalry of state.rivalries||[]){if(rivalry.status!=='active')continue;const a=riderById(state,rivalry.aId),b=riderById(state,rivalry.bId);if(a?.retired||b?.retired){rivalry.status='ended';rivalry.endYear=state.year-1;state.news.unshift({year:state.year,phase:'preseason',category:'Rivalry closed',importance:'major',headline:`${a?.name||'Rider'} vs ${b?.name||'Rider'} enters the archive`,body:'Retirement has ended one of the era’s tracked rivalries, but every recorded podium battle remains in Le Grand Braquet.',riderIds:[rivalry.aId,rivalry.bId]});}}enforceEliteCaps(state);applyTeamLifecycle(state);applySponsors(state);applyFacilities(state);applyDirectorMarket(state);applyTransfers(state);enforceEliteCaps(state);refillEliteVacancies(state,mulberry32(hashString(`${state.seed}|${state.year}|elite-refill`)));evolveEvents(state);prepareSeason(state);compactUciPointLedger(state);compactWeeklyRankings(state);compactRetiredRiders(state);captureWeeklyRankingSnapshot(state,1,{force:true,silent:true});state.news.unshift({year:state.year,phase:'preseason',category:'New season',importance:'lead',headline:`Le Grand Braquet presents the ${state.year} peloton`,body:'New sponsors, promoted prospects, director moves, tier changes and revised calendars open another season.'});return{state,opened:true,archive};
 }
 
-export function hallScore(rider){const c=rider.career,details=c.raceWinDetails||[];let major=0;if(details.length){for(const win of details){if(win.eventId==='tour')major+=4200;else if(win.eventId==='giro')major+=3000;else if(win.eventId==='vuelta')major+=2700;else if(win.kind==='monument')major+=650;else if(win.eventId==='worlds-road'||win.eventId==='worlds-tt')major+=1500;else if(win.kind==='championship')major+=500;else if(['stage','u23-stage'].includes(win.kind))major+=180;else major+=100;}}else major=(c.grandTours||0)*3100+(c.monuments||0)*650+(c.worlds||0)*1500+(c.weeklong||0)*200+(c.classics||0)*100;const dominance=Math.max(0,(c.grandTours||0)-2)*420+Math.max(0,(c.monuments||0)-7)*45;return Math.round(major+dominance+(c.stageWins||0)*25+(c.podiums||0)*10+(c.jerseys||0)*20+(c.uciPoints||0)*.04);}
+// Fame: what a career means to the public. Every top-10 finish is worth a share of the race's
+// win value, and the win value grows steeply with prestige, so the very biggest wins dominate:
+// two Tours outweigh three second places and four thirds in the Tour; those podiums outweigh a
+// couple of monuments; and two monuments outweigh half a dozen second places in classics.
+const FAME_PLACE=[1,.3,.18,.1,.07,.05,.04,.03,.025,.02];
+export function fameWinValue(prestige){return 10000*Math.pow(2,((prestige||50)-100)/5);}
+export function fameForPlace(prestige,rank){return fameWinValue(prestige)*(FAME_PLACE[rank-1]||0);}
+function editionFame(event,edition,add){
+  const win=fameWinValue(event.prestige);
+  (edition.top10||[]).forEach((row,i)=>add(row.riderId,win*(FAME_PLACE[(row.rank||i+1)-1]||0)));
+  if((edition.stageWinners||[]).length>1){
+    for(const stage of edition.stageWinners)add(stage.riderId,win*.035);
+    for(const[type,value]of Object.entries(edition.jerseys||{})){const id=value&&typeof value==='object'?value.id:value;if(id)add(id,win*(type==='young'?.04:.1));}
+  }
+}
+// Rebuilt from the full race history (every edition of every race), so it is always consistent
+// with the current prestige ladder.
+export function recomputeFame(state){const fame=new Map(),add=(id,value)=>id&&fame.set(id,(fame.get(id)||0)+value);for(const event of state.events||[])for(const edition of event.editions||[])editionFame(event,edition,add);for(const rider of state.riders||[])rider.fame=Math.round(fame.get(rider.id)||0);return fame;}
+function addEditionFame(state,event,edition){editionFame(event,edition,(id,value)=>{const rider=riderById(state,id);if(rider)rider.fame=Math.round((rider.fame||0)+value);});}
+export function riderFame(rider){return Math.round(rider?.fame||0);}
+export function hallScore(rider){return Math.round((rider.fame||0)+(rider.career?.uciPoints||0)*.05);}
 export function teamHallScore(team){const c=team.career;return Math.round((c.grandTours||0)*1500+(c.monuments||0)*900+(c.weeklong||0)*240+(c.classics||0)*150+(c.raceWins||0)*85+(c.stageWins||0)*38+(c.jerseys||0)*25+(c.uciPoints||0)*.08);}
 export function directorHallScore(director){const c=director.career;return Math.round((c.grandTours||0)*1250+(c.monuments||0)*750+(c.weeklong||0)*210+(c.raceWins||0)*70+(c.stageWins||0)*30+(c.uciPoints||0)*.06+director.ability*8);}
 
@@ -1056,7 +1154,7 @@ function applyDirectorMarket(state){
   const eliteDirectors=[...state.directors].filter(d=>!d.retired&&d.ability>=88&&state.year-(d.lastMoveYear||0)>=2).sort((a,b)=>b.ability-a.ability);for(const director of eliteDirectors){const origin=teamById(state,director.teamId);if(origin?.tier==='worldtour')continue;const destination=teams.filter(t=>t.tier==='worldtour'&&t.budget>=(origin?.budget||35)+7).map(t=>({t,current:directorById(state,t.directorId)})).filter(x=>!x.current||x.current.ability<director.ability-3).sort((a,b)=>(b.t.budget+teamNeedScore(state,b.t)*30)-(a.t.budget+teamNeedScore(state,a.t)*30))[0]?.t;if(destination)appointDirector(state,director,destination,'Elite director identified and poached from a lower tier');}
   for(const team of teams){const d=directorById(state,team.directorId);team.finances.directorSalary=d?.salary||0;}state.directorMoves=state.directorMoves.slice(0,300);
 }
-function evolveEvents(state){if((state.year-2025)%3!==0)return;const random=mulberry32(hashString(`${state.seed}|${state.year}|event-status`)),candidates=state.events.filter(e=>['proseries','continental'].includes(e.tier));shuffle(random,candidates).slice(0,3).forEach(event=>{const old=event.tier;if(event.tier==='continental'&&event.prestige>=55&&random()<.55){event.tier='proseries';event.prestige=clamp(event.prestige+7,0,85);}else if(event.tier==='proseries'&&event.prestige>=72&&random()<.22){event.tier='worldtour';event.prestige=clamp(event.prestige+8,0,92);}else event.prestige=clamp(event.prestige+randInt(random,-5,5),42,92);event.history.push({year:state.year,type:'status',from:old,to:event.tier,prestige:event.prestige});});}
+function evolveEvents(state){if((state.year-2025)%3!==0)return;const random=mulberry32(hashString(`${state.seed}|${state.year}|event-status`)),candidates=state.events.filter(e=>['proseries','continental'].includes(e.tier));shuffle(random,candidates).slice(0,3).forEach(event=>{const old=event.tier;if(event.tier==='continental'&&event.prestige>=52&&random()<.55){event.tier='proseries';event.prestige=clamp(event.prestige+7,0,TIER_PRESTIGE_CAP.proseries);}else if(event.tier==='proseries'&&event.prestige>=64&&random()<.22){event.tier='worldtour';event.prestige=clamp(event.prestige+6,70,TIER_PRESTIGE_CAP.worldtour);}else event.prestige=clamp(event.prestige+randInt(random,-5,5),42,TIER_PRESTIGE_CAP[event.tier]||69);event.history.push({year:state.year,type:'status',from:old,to:event.tier,prestige:event.prestige});});}
 
 export function topRiders(state,limit=20){return state.riders.filter(r=>!r.retired).sort((a,b)=>currentAbility(b)-currentAbility(a)).slice(0,limit);}
 export function hallOfFame(state,limit=25){return state.riders.filter(r=>r.career.seasonCount>0||r.retired).map(r=>({...r,hallScore:hallScore(r)})).sort((a,b)=>b.hallScore-a.hallScore).slice(0,limit);}
