@@ -272,6 +272,33 @@ Existing older universes are upgraded when opened. A new universe is still recom
 - The visual system remains an old European cycling almanac: cream stock, burgundy ink, brass accents and editorial serif display type.
 - See `QA_BALANCE_v1.0.md` for the final fixed-seed benchmark.
 
+## v2.2.3 — Calendar and race controls separated; past seasons' placings kept
+
+- **Top bar = calendar only:** +1 week, +4 weeks and Next event. Next event takes you to the race's pre-race screen and stops there. While an event is open (before or during the race) the weeks buttons are disabled and the main button only takes you back to it ("Go to Giro d'Italia", "Back to Giro d'Italia · paused") — it never starts or resumes anything.
+- **Race controls live in the race screen only:** Simulate (start), Pause / Continue, Skip to the finish, speed.
+- Leaving the race screen mid-race pauses it; come back with the top-bar button and press Continue.
+- The Stop bar for calendar simulation is gone.
+- **Fix:** riders' race-by-race placings for past seasons were wiped when each season closed (only the current season showed). They are now kept. Older saves get their past seasons rebuilt from every race's stored top ten (placings outside the top ten in those seasons can't be recovered). Archived placings are stored compactly so saves stay small.
+
+## v2.2.2 — Pause live races anywhere
+
+- One-day races now have **Pause / Continue** and **Skip to the finish** next to the speed buttons.
+- While a race is playing, the top bar has **Pause race / Continue race** on every page, so a Grand Tour can be stopped from anywhere — between stages or in the middle of a live stage.
+- The space bar pauses and resumes the race being played.
+
+## v2.2.1 — Stop the simulation at any moment
+
+- +1 week, +4 weeks and Next simulated event now run race by race with a "Simulating …" bar and a **Stop** button. Stopping finishes the race in progress, saves, and leaves you on that week; any simulation button carries on from there.
+
+## v2.2 — Personalities, rivalries, one header
+
+- **Personalities:** every rider has a mental trait (Serious, Rebel, Virtuoso, Warrior, Showman, Calculator, Nervous, Hungry) and a physical trait (Bull, Crystal, Diesel, Spark, Featherweight, Engine, Natural) — "the Rebel Bull". They set the development curve, the year-to-year ups and downs, career length, injury and illness risk, recovery, preferred races, strength by terrain, how the rider copes with the third week and with big occasions, how often he attacks and how much his form swings from day to day. Shown on the rider page, in race stories and rivalry news. Old saves get traits that fit each rider's existing career.
+- **Rivalries:** declared during the season from the last two seasons of results (3+ shared podiums — top five in a Grand Tour — in WorldTour races, Worlds or Olympics, one in a race of prestige 86+, each rider ahead at least once). The five strongest are followed at any time; quiet ones end. News when rivals meet again, a "Rivals on the start line" card before showcase races, and a "Rivalry at the top" line when two rivals share the GC podium.
+- **One-day races:** the live view marks the three top favourites (Fav 1/2/3) inside the groups, like the GC marks in stage races.
+- **Rider page:** a single header (the profile card); Back and Follow sit above the tabs.
+- **Hall of Fame:** All / Still racing / Retired filter and a status column.
+- Balance: Grand Tour top-end gaps narrowed (the favourite's edge over the third-best counts 55%), a second Grand Tour in a season is ridden on tired legs, and repeat winners of the same race carry more weight of history.
+
 ## v2.1 — Fame, prestige ladder, Olympics, old-save upgrade
 
 - **Prestige ladder:** Tour 100 · Olympic road race 95 · Worlds 93 · Giro 92 · Vuelta 90 · Olympic TT 88 · Worlds TT 86 · monuments 87–89 · great classics 80–85 · rest of the WorldTour 70–80 · ProSeries, U23 and continental under 70.

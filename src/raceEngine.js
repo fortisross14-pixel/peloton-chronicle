@@ -10,6 +10,7 @@
 // from earlier stages, and the tactical choices that follow (who may join the break, when
 // the leader's team lets it go, when it must chase).
 import { routeForEvent, FINISH_LABELS, SECTOR_LABELS } from './routes.js';
+import { traitEffects } from './personality.js';
 
 const PROFILES = ['flat', 'hill', 'climb', 'cobbles', 'cobbledClimb', 'gravel', 'sprint', 'punch', 'descend', 'tt'];
 const SECTOR_MIX = {
@@ -47,8 +48,16 @@ function nameList(list) {
   return `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
 }
 // Crashes: most riders get up and carry on, some ride on hurt, a few cannot continue.
-function crashOutcome(random) {
-  const roll = random();
+function crashOutcome(random, rider = null) {
+  const traits = rider ? traitEffects(rider) : null, risk = traits?.injury ?? 1;
+  // A fragile rider's crashes are worse; a bull walks away from most of them.
+  const roll = 1 - Math.pow(1 - random(), risk);
+  const scale = Math.sqrt(risk) * (traits?.injuryWeeks ?? 1);
+  const out = crashOutcomeFromRoll(roll, random);
+  if (out.weeks) out.weeks = Math.max(1, Math.round(out.weeks * scale));
+  return out;
+}
+function crashOutcomeFromRoll(roll, random) {
   if (roll < 0.5) return { severity: 'minor', weeks: 0 };
   if (roll < 0.72) return { severity: 'hurt', weeks: 1 + Math.floor(random() * 2) };
   const r = random();
@@ -80,7 +89,7 @@ export function buildRaceRiders(participants, power, random, { dayRange = 15, ca
     const p = {};
     for (const profile of PROFILES) p[profile] = power(rider, profile, team);
     const startWear = carry?.get(rider.id) || 0;
-    return { rider, team, id: rider.id, p, day: (random() - 0.5) * dayRange, wear: startWear, startWear, status: 'front', lost: 0, endurance: rider.skills?.endurance ?? 70 };
+    return { rider, team, id: rider.id, p, day: (random() - 0.5) * dayRange * traitEffects(rider).dayVar, wear: startWear, startWear, status: 'front', lost: 0, endurance: rider.skills?.endurance ?? 70 };
   });
 }
 
@@ -235,10 +244,12 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
     if (dropped.length) { const sorted = dropped.map((r) => r.lost).sort((a, b) => a - b); groups.push({ kind: 'dropped', label: 'Dropped riders', size: dropped.length, gap: Math.round(head + sorted[0]), riders: [] }); }
     groups.sort((a, b) => a.gap - b.gap);
     const entry = { km: Math.round(km), label, groups };
+    const behindHead = (r) => r.status === 'break' ? head - breakGap : r.status === 'lead' ? head - leadGap : r.status === 'front' ? head : r.status === 'dropped' ? head + r.lost : null;
+    const groupOf = (r) => groups.find((g) => g.kind === r.status)?.label || (r.status === 'out' ? 'Abandoned' : 'Dropped');
+    // Without a general classification (one-day races, first stages), follow the three top favourites.
+    if (!(stage?.gc && stage.number > 1)) entry.favWatch = ranked.slice(0, 3).map((r, i) => ({ id: r.id, rank: i + 1, status: r.status, group: groupOf(r), gap: behindHead(r) == null ? null : Math.max(0, Math.round(behindHead(r))) }));
     if (stage?.gc && stage.number > 1) {
       // Where the overall top three are right now, and the virtual podium if the race ended here.
-      const behindHead = (r) => r.status === 'break' ? head - breakGap : r.status === 'lead' ? head - leadGap : r.status === 'front' ? head : r.status === 'dropped' ? head + r.lost : null;
-      const groupOf = (r) => groups.find((g) => g.kind === r.status)?.label || (r.status === 'out' ? 'Abandoned' : 'Dropped');
       entry.gcWatch = riders.filter((r) => (gcRank(r) ?? 99) <= 3).sort((a, b) => gcRank(a) - gcRank(b)).map((r) => ({ id: r.id, rank: gcRank(r), overall: Math.round(gcGap(r)), status: r.status, group: groupOf(r), gap: behindHead(r) == null ? null : Math.max(0, Math.round(behindHead(r))) }));
       const onRoad = riders.filter((r) => r.status !== 'out' && gcGap(r) != null).map((r) => ({ r, t: gcGap(r) + behindHead(r) })).sort((a, b) => a.t - b.t);
       entry.virtualTop3 = onRoad.slice(0, 3).map((x) => ({ id: x.r.id, gap: Math.round(x.t - onRoad[0].t) }));
@@ -272,7 +283,7 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
   const crash = (km, victims, where, { sameTime = false, announce = true } = {}) => {
     const out = [], hurt = [];
     for (const r of victims) {
-      const outcome = crashOutcome(random);
+      const outcome = crashOutcome(random, r.rider);
       if (outcome.weeks) incidents.push({ riderId: r.id, kind: 'crash', km: Math.round(km), weeks: outcome.weeks, abandoned: outcome.severity === 'out', cause: injuryName(outcome.weeks) });
       if (outcome.severity === 'out') { r.status = 'out'; out.push(r); continue; }
       if (outcome.severity === 'hurt') { r.day -= 3; r.wear += 3; hurt.push(r); }
@@ -327,7 +338,7 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
     if (km === massCrashKm) {
       const bunch = inGroup('front');
       // Leaders ride near the front, shielded by their team-mates, and are caught up less often.
-      if (bunch.length > 10) { const victims = bunch.map((r) => ({ r, k: random() * (isLeader(r) && stage ? 0.35 : 1) })).sort((a, b) => b.k - a.k).slice(0, 2 + Math.floor(random() * 7)).map((x) => x.r); crash(km, victims, 'in the peloton'); }
+      if (bunch.length > 10) { const victims = bunch.map((r) => ({ r, k: random() * (isLeader(r) && stage ? 0.35 : 1) * traitEffects(r.rider).crash })).sort((a, b) => b.k - a.k).slice(0, 2 + Math.floor(random() * 7)).map((x) => x.r); crash(km, victims, 'in the peloton'); }
     }
     // Intermediate sprint: the break takes the top places, the sprinters fight for the rest.
     if (route.sprintKm && km === route.sprintKm && !sprintResult) {
@@ -429,7 +440,7 @@ export function rideRoad({ route, riders, random, stage = null, recordSnapshots 
           const comfortable = comfortableLeader === r ? 0.3 : 0;
           const domestique = stage && !isLeader(r) && riders.find((l) => l.id === leaderOf.get(teamIdOf(r)))?.status === 'front' && marked.has(leaderOf.get(teamIdOf(r)));
           const chance = 0.13 + (d >= 7 ? 0.12 : 0) + (lastBig ? 0.25 : 0) + (sprinterFinish && !sprinterType ? 0.1 : 0) - (sprinterFinish && sprinterType ? 0.25 : 0) + (favorites.has(r.id) ? 0.06 : 0.04) + gcBonus - comfortable - (domestique ? 0.2 : 0) - ((stage?.stageWins?.get(r.id) || 0) >= 3 ? 0.15 : 0);
-          return comfortableLeader !== r && random() < chance;
+          return comfortableLeader !== r && random() < chance * traitEffects(r.rider).attack;
         });
         const attacker = candidates[0];
         if (attacker) {

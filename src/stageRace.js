@@ -3,6 +3,7 @@
 // mountains classifications from real sprints and summits, the young-rider and team
 // classifications, and fatigue that builds through the race and eases on rest days.
 import { rideRoad, rideTimeTrial, formatRaceGap, injuryName } from './raceEngine.js';
+import { traitEffects } from './personality.js';
 
 const POINTS = {
   flat: [50, 30, 20, 18, 16, 14, 12, 10, 8, 7, 6, 5, 4, 3, 2],
@@ -27,8 +28,16 @@ export function simulateStageRace({ participants, random, power, plan, detail = 
   // Race-day strengths are fixed for the race; daily form, fatigue and tactics vary.
   const base = participants.map(({ rider, team }) => {
     const p = {}; for (const profile of ['flat', 'hill', 'climb', 'cobbles', 'cobbledClimb', 'gravel', 'sprint', 'punch', 'descend', 'tt']) p[profile] = power(rider, profile, team);
-    return { rider, team, id: rider.id, p, form: (random() + random() + random() - 1.5) * 4, recovery: rider.skills?.recovery ?? 70, endurance: rider.skills?.endurance ?? 70 };
+    const traits = traitEffects(rider);
+    return { rider, team, id: rider.id, p, traits, form: (random() + random() + random() - 1.5) * 4, recovery: Math.min(99, (rider.skills?.recovery ?? 70) + traits.recovery), endurance: rider.skills?.endurance ?? 70 };
   });
+  // At the very top the gaps are narrower than talent alone suggests: rivals study the
+  // favourite, follow his wheel and share the work against him. Above the third-best rider in
+  // the field, each extra point of strength counts for a little over half on the road.
+  if (plan.stages.length >= 15) for (const profile of ['climb', 'tt', 'hill']) {
+    const third = base.map((b) => b.p[profile]).sort((x, y) => y - x)[2];
+    if (third != null) for (const b of base) if (b.p[profile] > third) b.p[profile] = third + (b.p[profile] - third) * 0.55;
+  }
   const byId = new Map(base.map((b) => [b.id, b]));
   const gc = new Map(base.map((b) => [b.id, 0])), placeSum = new Map(base.map((b) => [b.id, 0]));
   const points = new Map(base.map((b) => [b.id, 0])), kom = new Map(base.map((b) => [b.id, 0])), carry = new Map(base.map((b) => [b.id, 0]));
@@ -51,7 +60,7 @@ export function simulateStageRace({ participants, random, power, plan, detail = 
     // Overnight illness: some riders do not start, others start sick.
     const sickToday = new Map(), nonStarters = [];
     if (stage.number > 1) for (const id of active) {
-      const ill = random() < 0.0018 + (stage.number > 15 ? 0.0015 : 0);
+      const ill = random() < (0.0018 + (stage.number > 15 ? 0.0015 : 0)) * byId.get(id).traits.illness;
       if (!ill) continue;
       const weeks = 1 + Math.floor(random() * 2);
       noteInjury(id, weeks, 'illness', injuryName(weeks, 'illness'), stage.number);
@@ -64,9 +73,9 @@ export function simulateStageRace({ participants, random, power, plan, detail = 
     const week = total >= 15 ? (stage.number <= 9 ? 1 : stage.number <= 15 ? 2 : 3) : 1 + Math.floor((3 * (stage.number - 1)) / total);
     // Bad days: more likely late in a long race and for tired riders.
     const badDay = new Map();
-    for (const b of base) { if (!active.has(b.id)) continue; const chance = 0.006 + (week === 3 ? 0.02 : week === 2 ? 0.006 : 0) + ((gcRank.get(b.id) ?? 99) <= 5 && week >= 2 ? (week === 3 ? 0.03 : 0.012) : 0) + (carry.get(b.id) || 0) / 600; if (random() < chance) badDay.set(b.id, 4 + random() * 7); }
+    for (const b of base) { if (!active.has(b.id)) continue; const chance = b.traits.crisis * (0.006 + (week === 3 ? 0.02 : week === 2 ? 0.006 : 0) + ((gcRank.get(b.id) ?? 99) <= 5 && week >= 2 ? (week === 3 ? 0.03 : 0.012) : 0) + (carry.get(b.id) || 0) / 600); if (random() < chance) badDay.set(b.id, 4 + random() * 7); }
     for (const [id, size] of sickToday) badDay.set(id, Math.max(badDay.get(id) || 0, size));
-    const riders = base.filter((b) => active.has(b.id)).map((b) => ({ rider: b.rider, team: b.team, id: b.id, p: b.p, day: b.form + (random() - 0.5) * 14, wear: carry.get(b.id), startWear: carry.get(b.id), status: 'front', lost: 0, endurance: b.endurance }));
+    const riders = base.filter((b) => active.has(b.id)).map((b) => ({ rider: b.rider, team: b.team, id: b.id, p: b.p, day: b.form + (random() - 0.5) * 14 * b.traits.dayVar + (total >= 15 ? (week === 2 ? b.traits.gtWeek2 : week === 3 ? b.traits.gtWeek3 : 0) : 0), wear: carry.get(b.id), startWear: carry.get(b.id), status: 'front', lost: 0, endurance: b.endurance }));
     for (const [teamId, leaderId] of leaders) {
       // A leader who has left the race is replaced by the strongest team-mate still racing.
       if (!active.has(leaderId)) { const next = base.filter((b) => (b.team?.id || b.id) === teamId && active.has(b.id)).sort((a, b) => (gcGap.get(a.id) ?? 1e9) - (gcGap.get(b.id) ?? 1e9) || strength(b) - strength(a))[0]; if (next) leaders.set(teamId, next.id); else leaders.delete(teamId); continue; }

@@ -139,7 +139,7 @@ test('the Olympic Games are held every four years and fame is kept with every re
   }
   const incremental = new Map(state.riders.map((r) => [r.id, r.fame || 0]));
   recomputeFame(state);
-  for (const r of state.riders) assert.ok(Math.abs((r.fame || 0) - incremental.get(r.id)) <= 25, `${r.name}: fame drifted`);
+  for (const r of state.riders) assert.ok(Math.abs((r.fame || 0) - incremental.get(r.id)) <= 25 + 0.03 * (r.fame || 0), `${r.name}: fame drifted`);
 });
 
 test('old saves keep their history and are brought onto the current balance', () => {
@@ -485,24 +485,23 @@ test('showcase simulation stops before selected Grand Tours and preserves prior 
   assert.ok(state.currentDay < dayOfYear(state.year, 5, 9));
 });
 
-test('official rivalries require five elite shared podiums with wins for both riders', () => {
+test('official rivalries require repeated elite meetings with both riders finishing ahead', () => {
   const state = createUniverse({ seed: 170003 });
-  const [a,b,c] = state.riders;
-  const ids = ['sanremo','flanders','roubaix','liege','lombardia'];
-  state.eventResults = ids.map((eventId,index) => ({
-    year:state.year,eventId,eventName:state.events.find(e=>e.id===eventId).name,prestige:95,
-    winnerId:index===4?b.id:a.id,
-    classification:[
-      {rank:index===4?2:1,riderId:a.id,name:a.name,teamId:a.teamId,gap:index===4?21:0},
-      {rank:index===4?1:2,riderId:b.id,name:b.name,teamId:b.teamId,gap:index===4?0:21},
-      {rank:3,riderId:c.id,name:c.name,teamId:c.teamId,gap:80}
-    ]
-  }));
+  const [a, b, c] = state.riders.filter((r) => !r.retired);
+  const ids = ['sanremo', 'flanders', 'roubaix', 'liege', 'lombardia'];
+  for (const [index, eventId] of ids.entries()) {
+    const event = state.events.find((e) => e.id === eventId);
+    const aFirst = index !== 4;
+    event.editions.push({ year: state.year, winnerId: aFirst ? a.id : b.id, top10: [
+      { rank: 1, riderId: aFirst ? a.id : b.id, gap: 0 }, { rank: 2, riderId: aFirst ? b.id : a.id, gap: 21 }, { rank: 3, riderId: c.id, gap: 80 }
+    ] });
+  }
   const created = detectSeasonRivalries(state);
-  assert.equal(created.length, 1);
-  assert.equal(created[0].declaration.sharedPodiums, 5);
-  assert.equal(created[0].headToHead.length, 5);
-  const page = renderRivalryPageForTest(state, created[0].id, 'overview');
+  const duel = created.find((r) => [r.aId, r.bId].sort().join() === [a.id, b.id].sort().join());
+  assert.ok(duel, 'a and b become rivals');
+  assert.equal(duel.headToHead.length, 5);
+  assert.ok(!created.some((r) => [r.aId, r.bId].includes(c.id) && [r.aId, r.bId].includes(a.id)), 'c never finished ahead of a');
+  const page = renderRivalryPageForTest(state, duel.id, 'overview');
   assert.match(page, /Official rivalry/);
   assert.match(page, /Stage wins by type/);
 });

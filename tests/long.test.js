@@ -41,7 +41,7 @@ test('keeps a five-season chronicle structurally valid', () => {
     assert.ok(eliteMoves.length <= 6, `elite market should remain selective in ${year}`);
     assert.equal(eliteMoves.filter(move => move.fromTier === 'worldtour' && move.toTier !== 'worldtour').length, 0);
   }
-  assert.ok(JSON.stringify(state).length < 16_000_000);
+  assert.ok(JSON.stringify(compactUniverseForSave(state)).length < 12_000_000, 'saved chronicle stays compact');
   // Competitive balance: no WorldTeam hoards stars once the market has run.
   for (const team of state.teams.filter(team => team.status === 'active' && team.tier === 'worldtour')) {
     const stars = team.roster.map(id => state.riders.find(rider => rider.id === id)).filter(rider => rider && ['generational', 'legend', 'epic'].includes(rider.rarity)).length;
